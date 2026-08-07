@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google'
 import SceneCanvas from '@/components/scene/SceneCanvas'
 import SmoothScroll from '@/components/providers/SmoothScroll'
+import HotkeyMount from '@/components/terminal/HotkeyMount'
+import { getAllCases } from '@/lib/content'
 import { site } from '@/lib/site'
 import '@/styles/globals.css'
 
@@ -16,6 +18,8 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
+  const cases = getAllCases().map((c) => ({ slug: c.slug, title: c.title }))
+
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
@@ -25,6 +29,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
             {children}
           </div>
         </SmoothScroll>
+        <HotkeyMount cases={cases} />
       </body>
     </html>
   )

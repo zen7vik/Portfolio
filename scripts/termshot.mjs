@@ -1,0 +1,23 @@
+// Dev-time helper: open terminal + palette, screenshot both.
+import { chromium } from '@playwright/test'
+const out = process.argv[2] ?? '.'
+const browser = await chromium.launch()
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+await page.goto('http://localhost:3000/', { waitUntil: 'networkidle' })
+await page.waitForTimeout(3000)
+await page.keyboard.press('`')
+await page.waitForTimeout(400)
+await page.getByRole('textbox').fill('help')
+await page.keyboard.press('Enter')
+await page.getByRole('textbox').fill('ls work/')
+await page.keyboard.press('Enter')
+await page.waitForTimeout(300)
+await page.screenshot({ path: `${out}/terminal.png` })
+await page.keyboard.press('Escape')
+await page.keyboard.press('Meta+k')
+await page.waitForTimeout(400)
+await page.getByRole('textbox').fill('risk')
+await page.waitForTimeout(200)
+await page.screenshot({ path: `${out}/palette.png` })
+await browser.close()
+console.log('saved terminal.png palette.png')
