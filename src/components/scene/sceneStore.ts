@@ -14,11 +14,32 @@ const state: SceneState = {
   burst: 0,
 }
 
+// the section-level "resting" state; hover effects are transient deviations from this
+const base = { formation: 'name' as Formation, intensity: 1, accent: '#7c8cff' }
+
 const listeners = new Set<(s: SceneState) => void>()
 
+function notify() {
+  for (const fn of listeners) fn(state)
+}
+
+/** Transient change (hover glows, bursts). Does not move the resting state. */
 export function setScene(partial: Partial<SceneState>): void {
   Object.assign(state, partial)
-  for (const fn of listeners) fn(state)
+  notify()
+}
+
+/** Section/page-level change. Updates the resting state hovers return to. */
+export function setSceneBase(partial: Partial<Pick<SceneState, 'formation' | 'intensity' | 'accent'>>): void {
+  Object.assign(base, partial)
+  Object.assign(state, partial)
+  notify()
+}
+
+/** Return to the current section's resting state (ends a hover). */
+export function restoreSceneBase(): void {
+  Object.assign(state, base)
+  notify()
 }
 
 export function getScene(): SceneState {

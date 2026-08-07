@@ -53,13 +53,14 @@ export default function CaseLayout({
             <span>{meta.role}</span>
             <span>{meta.period}</span>
           </div>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {meta.stats.map((s) => (
-              <span key={s.label} className="rounded-full border border-fg/15 px-3 py-1.5 font-mono text-xs text-muted">
+          <p className="mt-5 max-w-2xl font-mono text-xs leading-relaxed text-muted">
+            {meta.stats.map((s, i) => (
+              <span key={s.label}>
                 <span className="text-fg">{s.value}</span> {s.label}
+                {i < meta.stats.length - 1 && <span className="mx-2 text-muted/50">·</span>}
               </span>
             ))}
-          </div>
+          </p>
         </Reveal>
       </header>
 

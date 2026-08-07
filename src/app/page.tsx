@@ -1,5 +1,6 @@
 import SectionMorpher from '@/components/scene/SectionMorpher'
 import About from '@/components/sections/About'
+import TopNav from '@/components/sections/TopNav'
 import Contact from '@/components/sections/Contact'
 import Hero from '@/components/sections/Hero'
 import Misc from '@/components/sections/Misc'
@@ -14,6 +15,7 @@ export default async function Home() {
 
   return (
     <main>
+      <TopNav />
       <SectionMorpher />
       <Hero />
       <About />

@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect } from 'react'
-import type { Formation } from '@/components/scene/formations'
-import { setScene } from '@/components/scene/sceneStore'
+import { portraitReady, preloadPortrait, type Formation } from '@/components/scene/formations'
+import { setSceneBase } from '@/components/scene/sceneStore'
 import { prefersReducedMotion } from '@/lib/motion'
 
 const SECTION_FORMATIONS: Record<string, { formation: Formation; intensity: number; accent: string }> = {
   hero: { formation: 'name', intensity: 1, accent: '#7c8cff' },
-  about: { formation: 'sphere', intensity: 0.4, accent: '#7c8cff' },
-  work: { formation: 'lattice', intensity: 0.7, accent: '#58c48f' },
+  about: { formation: 'sphere', intensity: 0.32, accent: '#7c8cff' },
+  work: { formation: 'lattice', intensity: 0.45, accent: '#58c48f' },
   personal: { formation: 'helix', intensity: 0.55, accent: '#f0b35e' },
   writing: { formation: 'ambient', intensity: 0.5, accent: '#5ac8dd' },
   contact: { formation: 'vortex', intensity: 1, accent: '#f27a8a' },
@@ -17,13 +17,16 @@ const SECTION_FORMATIONS: Record<string, { formation: Formation; intensity: numb
 export default function SectionMorpher() {
   useEffect(() => {
     if (prefersReducedMotion()) return
+    preloadPortrait()
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue
           const conf = SECTION_FORMATIONS[entry.target.id]
           if (conf) {
-            setScene({ formation: conf.formation, intensity: conf.intensity, accent: conf.accent })
+            const formation =
+              entry.target.id === 'about' && portraitReady() ? ('portrait' as Formation) : conf.formation
+            setSceneBase({ formation, intensity: conf.intensity, accent: conf.accent })
           }
         }
       },

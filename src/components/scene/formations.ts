@@ -1,5 +1,69 @@
-export const FORMATIONS = ['name', 'ambient', 'sphere', 'lattice', 'vortex', 'helix', 'wave', 'torus', 'twin'] as const
+export const FORMATIONS = [
+  'name',
+  'ambient',
+  'sphere',
+  'lattice',
+  'vortex',
+  'helix',
+  'wave',
+  'torus',
+  'twin',
+  'portrait',
+] as const
 export type Formation = (typeof FORMATIONS)[number]
+
+// --- portrait: particles assemble into a photo (public/me.jpg) ---------------
+let portraitPoints: { x: number; y: number; l: number }[] | null = null
+
+/** Kick off loading the portrait; safe to call repeatedly. */
+export function preloadPortrait(url = '/me.jpg'): void {
+  if (typeof window === 'undefined' || portraitPoints) return
+  const img = new Image()
+  img.crossOrigin = 'anonymous'
+  img.onload = () => {
+    const W = 220
+    const H = Math.round((img.height / img.width) * W)
+    const canvas = document.createElement('canvas')
+    canvas.width = W
+    canvas.height = H
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    if (!ctx) return
+    ctx.drawImage(img, 0, 0, W, H)
+    const data = ctx.getImageData(0, 0, W, H).data
+    const pts: { x: number; y: number; l: number }[] = []
+    for (let y = 0; y < H; y += 1) {
+      for (let x = 0; x < W; x += 1) {
+        const i = (y * W + x) * 4
+        const lum = (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]) / 255
+        const a = data[i + 3] / 255
+        // keep bright-ish pixels; probability scales with luminance for shading
+        if (a > 0.5 && lum > 0.18 && Math.random() < lum * lum + 0.04) {
+          pts.push({ x: x / W - 0.5, y: 0.5 - y / H, l: lum })
+        }
+      }
+    }
+    if (pts.length > 200) portraitPoints = pts
+  }
+  img.src = url
+}
+
+export function portraitReady(): boolean {
+  return portraitPoints !== null
+}
+
+export function portrait(count: number): Float32Array {
+  if (!portraitPoints) return sphere(count)
+  const arr = new Float32Array(count * 3)
+  const H_WORLD = 5.4
+  for (let i = 0; i < count; i++) {
+    const p = portraitPoints[Math.floor(Math.random() * portraitPoints.length)]
+    arr[i * 3] = p.x * H_WORLD * 0.82 + (Math.random() - 0.5) * 0.04
+    arr[i * 3 + 1] = p.y * H_WORLD + (Math.random() - 0.5) * 0.04
+    // brighter pixels sit closer to the camera for a relief effect
+    arr[i * 3 + 2] = p.l * 0.9 + (Math.random() - 0.5) * 0.15
+  }
+  return arr
+}
 
 // All generators return Float32Array of length count*3, roughly within [-6, 6].
 
@@ -194,6 +258,8 @@ export function getFormation(name: Formation, count: number): Float32Array {
       return torus(count)
     case 'twin':
       return twin(count)
+    case 'portrait':
+      return portrait(count)
     default:
       return ambient(count)
   }

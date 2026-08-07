@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import type { Formation } from '@/components/scene/formations'
-import { setScene } from '@/components/scene/sceneStore'
+import { setSceneBase } from '@/components/scene/sceneStore'
 
 export default function CaseSceneSetter({
   accent,
@@ -14,7 +14,7 @@ export default function CaseSceneSetter({
   intensity?: number
 }) {
   useEffect(() => {
-    setScene({ formation, intensity, accent })
+    setSceneBase({ formation, intensity, accent })
   }, [accent, formation, intensity])
   return null
 }

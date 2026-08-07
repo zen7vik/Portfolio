@@ -15,6 +15,7 @@ const vertexShader = /* glsl */ `
   attribute float aRand;
   uniform float uTime;
   uniform float uMorph;
+  uniform float uStagger;
   uniform float uBurst;
   uniform float uIntensity;
   uniform vec3 uPointer;
@@ -23,7 +24,7 @@ const vertexShader = /* glsl */ `
 
   void main() {
     vRand = aRand;
-    float stagger = ${STAGGER};
+    float stagger = uStagger;
     float p = clamp((uMorph * (1.0 + stagger) - aRand * stagger), 0.0, 1.0);
     p = p * p * (3.0 - 2.0 * p); // smoothstep ease per particle
     vec3 pos = mix(aFrom, aTarget, p);
@@ -96,6 +97,7 @@ export default function Particles({ count }: { count: number }) {
     const uniforms = {
       uTime: { value: 0 },
       uMorph: { value: 0 },
+      uStagger: { value: STAGGER },
       uBurst: { value: 0 },
       uIntensity: { value: initial.intensity },
       uPointer: { value: new THREE.Vector3(99, 99, 0) },
@@ -159,11 +161,13 @@ export default function Particles({ count }: { count: number }) {
         const targetAttr = geometry.getAttribute('aTarget') as THREE.BufferAttribute
         const fromArr = fromAttr.array as Float32Array
         const targetArr = targetAttr.array as Float32Array
-        // bake current visual position into aFrom (approximate per-particle progress)
+        // exact bake: fold the current visual position into aFrom using the same
+        // per-particle progress formula the shader uses, so the morph restart is seamless
         const rand = (geometry.getAttribute('aRand') as THREE.BufferAttribute).array as Float32Array
         const m = uniforms.uMorph.value
+        const stag = uniforms.uStagger.value
         for (let i = 0; i < rand.length; i++) {
-          let p = Math.min(1, Math.max(0, m * (1 + STAGGER) - rand[i] * STAGGER))
+          let p = Math.min(1, Math.max(0, m * (1 + stag) - rand[i] * stag))
           p = p * p * (3 - 2 * p)
           const j = i * 3
           fromArr[j] = fromArr[j] + (targetArr[j] - fromArr[j]) * p
@@ -173,12 +177,14 @@ export default function Particles({ count }: { count: number }) {
         targetAttr.copyArray(getFormation(s.formation, rand.length))
         fromAttr.needsUpdate = true
         targetAttr.needsUpdate = true
+        // gentle stagger after the intro so mid-scroll retargets never snap
+        uniforms.uStagger.value = 0.1
         uniforms.uMorph.value = 0
         morphState.current.value = 0
         gsap.to(morphState.current, {
           value: 1,
-          duration: 1.6,
-          ease: 'power3.inOut',
+          duration: 1.9,
+          ease: 'power2.inOut',
           overwrite: true,
           onUpdate: () => {
             uniforms.uMorph.value = morphState.current.value

@@ -12,16 +12,14 @@ export default function Hero() {
             <p className="font-display text-2xl font-medium leading-snug text-fg md:text-3xl">{site.tagline}</p>
           </Reveal>
           <Reveal immediate delay={1.8}>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {site.stats.map((s) => (
-                <span
-                  key={s.label}
-                  className="rounded-full border border-fg/15 px-3 py-1.5 font-mono text-xs text-muted"
-                >
+            <p className="mt-6 max-w-lg font-mono text-xs leading-relaxed text-muted">
+              {site.stats.map((s, i) => (
+                <span key={s.label}>
                   <span className="text-fg">{s.value}</span> {s.label}
+                  {i < site.stats.length - 1 && <span className="mx-2 text-muted/50">·</span>}
                 </span>
               ))}
-            </div>
+            </p>
           </Reveal>
           <Reveal immediate delay={2}>
             <div className="mt-8 flex items-center gap-5">
