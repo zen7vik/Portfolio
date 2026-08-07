@@ -1,0 +1,48 @@
+---
+title: A risk-scoring engine that stopped falling over
+hook: 500M events a month, 6 regions, and a 3-week war on 24 production incidents
+role: Owner, risk-scoring engine
+period: 2025 to present
+accent: green
+order: 2
+stats:
+  - value: '500M'
+    label: 'events/month processed'
+  - value: 'p99 585ms'
+    label: '1.16M risk evaluations/month'
+  - value: '24'
+    label: 'incidents resolved in one push'
+summary: I operate the engine that computes every customer's cyber-risk posture across 6 production regions, and I led the reliability push that took it from weekly memory incidents to boring.
+---
+
+## The problem
+
+The scoring engine is the heart of the platform: every control change, assessment, and threat-intel update flows through it to recompute customer risk. At ~500M events a month it had become the platform's least boring service: 10 critical-memory incidents and 14 CPU incidents in quick succession, OOM-killed consumers during large tenant deletions, and P0 customer APIs breaching their latency targets.
+
+## The system
+
+Scoring is event-driven: upstream changes land on a reactor that decides what to rescore, a buffer queue dedupes storms, and consumers assemble inputs for the probabilistic engine (an external FAIR/Monte Carlo scoring API), then aggregate scenario scores up to entity level. The engine's job is orchestration done well: caching, batching, persistence, and blast-radius control.
+
+<Scrolly case="risk-engine" />
+
+The reliability push attacked the incident classes one by one:
+
+- **Memory retention.** Bulk org deletions loaded full 40-column ORM instances just to delete and audit them. Rewrote the path to fetch only the 9 needed columns as plain rows, stopped returning the array so nothing retained it, and added guarded eviction for a per-entity mutex cache that had grown unbounded. Also collapsed an accidental O(n²) spread-in-loop.
+- **Database indexing** on the hot lookup paths that ate CPU during scoring storms.
+- **Cache-TTL redesign.** Centralized every TTL, keyed the scoring cache by input hash with a 24-hour window, and made buffer dedup collapse control-storms before they fanned out into simulations.
+- **Load-shedding kill switch.** An operational flag checked at the top of the scoring path: when the downstream simulation API degrades, consumers drain messages without piling up retries, while admin-forced rescores still pass through.
+- **Self-healing.** A job that finds and regenerates stale risk data every 10 minutes, so recovery from a bad window needs no human.
+
+## Key decisions
+
+- **Dedupe before you scale.** The cheapest simulation is the one you never run; buffer-queue dedup and input-hash caching bought more capacity than any instance resize.
+- **Kill switches are features.** Explicitly designing the degraded mode (drain, do not retry-storm) turned outages into non-events.
+- **Fix the allocation, not the limit.** The OOM fix was measured object-shape work, not a bigger container.
+
+## Outcomes
+
+The push resolved all 24 incident threads, and the platform-wide follow-through brought P95 latency of critical P0 customer APIs under 1 second. The engine now serves ~1.16M risk evaluations a month at p99 585ms across 6 regions, and on-call for it is quiet.
+
+## What I'd do differently
+
+Consolidate the scoring client so a temporary in-service re-implementation cannot drift from the external API, and add a request-level timeout on every S3 read; one hung read during a what-if simulation once taught us that lesson the hard way.

@@ -1,0 +1,52 @@
+---
+title: An extensible workflow automation platform
+hook: Turning a fixed workflow tool into a platform any API can plug into
+role: Owner, workflow automation platform
+period: 2025 to present
+accent: indigo
+order: 1
+stats:
+  - value: '147K'
+    label: 'workflows/month in production'
+  - value: '29'
+    label: 'stories shipped in one epic'
+  - value: '0'
+    label: 'plaintext secrets, anywhere'
+summary: I own a Temporal-based workflow engine running 147K automated workflows a month, and I built the generic HTTP integration node that turned it from a fixed tool into an extensible integration platform.
+---
+
+## The problem
+
+Our workflow engine ran third-party risk automation: assess a vendor, create issues, send reminders, escalate. Every action was a hand-built node. When a customer wanted to wire in Slack, Jira, or any internal API, the answer was "wait for engineering to build that node." A fixed menu, growing backlog.
+
+The fix sounds simple: add a generic HTTP request node. But a node that makes arbitrary HTTP calls from inside a multi-tenant platform is a security minefield. It needs credentials that analysts can save but never read back, egress that cannot be pointed at our own internal network, and failure semantics that make sense to a non-engineer staring at a workflow run.
+
+## The system
+
+The engine itself is Go on Temporal. A workflow is a JSON graph of typed nodes; a framework-agnostic interpreter walks the graph, and every node stays deterministic by delegating I/O to Temporal activities. Nodes self-register at boot, so adding a node type is one file, not a wiring exercise.
+
+<Scrolly case="workflow-platform" />
+
+The HTTP node is the deep end of that model:
+
+- **Credentials vault.** Secrets are stored envelope-encrypted in the admin service. The workflow runtime resolves a credential at execution time: fetch ciphertext, decrypt each sensitive field through the auth service, apply it to the outgoing request. No plaintext is ever logged or returned to a client. Analysts pick a credential from a dropdown; nobody, including the builder UI, can read it back.
+- **SSRF-hardened egress.** The dialer resolves DNS once, pins the connection to that IP, and rejects private ranges, link-local, and metadata endpoints, with per-credential exact-host allowlists on top. The n8n-style bypass class (rebind after validation) is closed by construction.
+- **Response classification.** Every outcome is classified: got an HTTP status means the workflow branches on it like data; no response for security or config reasons means the run halts. That one rule replaced a mess of per-case retry flags.
+- **Test panel.** Builders can fire a test request from the editor that runs the identical hardened path as production, seeing exactly what the run would see, secrets still invisible.
+
+Around the node, the platform grew up: node UI is now declared by the backend (layout, actions, data sources) so the frontend renders any future node generically, and an event-driven execution insights pipeline emits per-run metrics behind a feature flag.
+
+## Key decisions
+
+- **Determinism boundary first.** Node logic never does I/O; activities do. Temporal replay stays correct, and the interpreter stays unit-testable with zero Temporal imports.
+- **Fail closed everywhere.** Missing tenant context, unresolvable credential, unparseable config: the run stops before a byte leaves the network. The only retries are for outcomes where retrying cannot double-write.
+- **Buy the boring part.** Encryption primitives came from our shared security library rather than a local implementation, one audited path instead of two.
+- **Backend-declared UI.** Node config schemas live server-side, so shipping a node no longer requires a frontend release.
+
+## Outcomes
+
+The platform runs about 147K workflows a month. The HTTP node shipped as a 29-story epic covering the vault, egress hardening, classification, test tooling, and UI, with security review of the dialer and credential path. Teams now wire new integrations as workflow configuration instead of feature requests.
+
+## What I'd do differently
+
+Codegen typed config structs per node instead of validating maps at runtime. And I would design the execution insights schema alongside the node from day one; retrofitting per-node metrics onto historical runs was avoidable work.
