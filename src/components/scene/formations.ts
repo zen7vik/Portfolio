@@ -87,13 +87,19 @@ export function sampleText(
   }
   if (!pts.length) return ambient(count)
   const arr = new Float32Array(count * 3)
-  const scale = 9 / W
+  // fit the text to the visible world width (camera z=8, fov 50)
+  const halfH = 8 * Math.tan((25 * Math.PI) / 180)
+  const aspect = window.innerWidth / window.innerHeight
+  const worldW = 2 * halfH * aspect
+  const scale = Math.min(9, worldW * 0.92) / W
+  // portrait: lift the name above the hero copy
+  const yOffset = aspect < 1 ? 1.4 : 0
   // ~70% of particles form the glyphs; the rest hang back as a sparse halo
   const glyphCount = Math.floor(count * 0.7)
   for (let i = 0; i < glyphCount; i++) {
     const [x, y] = pts[Math.floor(Math.random() * pts.length)]
     arr[i * 3] = (x - W / 2) * scale + (Math.random() - 0.5) * 0.03
-    arr[i * 3 + 1] = -(y - H / 2) * scale + (Math.random() - 0.5) * 0.03
+    arr[i * 3 + 1] = -(y - H / 2) * scale + yOffset + (Math.random() - 0.5) * 0.03
     arr[i * 3 + 2] = (Math.random() - 0.5) * 0.3
   }
   for (let i = glyphCount; i < count; i++) {

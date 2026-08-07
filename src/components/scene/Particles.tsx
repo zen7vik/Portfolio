@@ -99,7 +99,7 @@ export default function Particles({ count }: { count: number }) {
       uBurst: { value: 0 },
       uIntensity: { value: initial.intensity },
       uPointer: { value: new THREE.Vector3(99, 99, 0) },
-      uSize: { value: 9 },
+      uSize: { value: window.innerWidth < 768 ? 5.5 : 9 },
       uColBase: { value: new THREE.Color('#e8e8ea') },
       uAccent: { value: new THREE.Color(initial.accent) },
     }
