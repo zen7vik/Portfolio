@@ -1,0 +1,89 @@
+<style>
+  .sc-mock { border-radius: 8px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(128,128,128,.25); height: 150px; position: relative; }
+  .sc-net { background: radial-gradient(ellipse at 50% 60%, #10142a 0%, #05060d 75%); }
+  .sc-node { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #7c8cff; box-shadow: 0 0 12px #7c8cff88; animation: sc-drift 4s ease-in-out infinite; }
+  .sc-node.g { background: #58c48f; box-shadow: 0 0 12px #58c48f88; }
+  .sc-edge { position: absolute; height: 1px; background: linear-gradient(90deg, #7c8cff33, #7c8cff99, #7c8cff33); transform-origin: left center; animation: sc-glow 2.2s ease-in-out infinite; }
+  @keyframes sc-drift { 0%,100% { transform: translate(0,0); } 50% { transform: translate(4px,-5px); } }
+  @keyframes sc-glow { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
+  .sc-morph { background: radial-gradient(ellipse at 50% 50%, #171531 0%, #060510 75%); display: flex; align-items: center; justify-content: center; }
+  .sc-letters { font-family: Menlo, monospace; font-size: 26px; font-weight: 700; color: #cdd3ff; letter-spacing: 4px; }
+  .sc-letters span { display: inline-block; animation: sc-assemble 3s ease-in-out infinite; }
+  .sc-letters span:nth-child(2) { animation-delay: .2s } .sc-letters span:nth-child(3) { animation-delay: .4s }
+  .sc-letters span:nth-child(4) { animation-delay: .6s } .sc-letters span:nth-child(5) { animation-delay: .8s }
+  .sc-letters span:nth-child(6) { animation-delay: 1s }
+  @keyframes sc-assemble { 0%,100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); } 50% { transform: translateY(-9px) scale(1.12); opacity: .45; filter: blur(1.5px); } }
+  .sc-globe { background: radial-gradient(ellipse at 50% 45%, #0c1c2e 0%, #04070d 75%); display:flex; align-items:center; justify-content:center; }
+  .sc-sphere { width: 96px; height: 96px; border-radius: 50%; border: 1px solid #2e5f8a; position: relative; background: radial-gradient(circle at 35% 30%, #14344f55, transparent 60%); animation: sc-spin 8s linear infinite; }
+  .sc-lat { position:absolute; left: 4%; right: 4%; top: 50%; height: 36%; margin-top: -18%; border: 1px solid #2e5f8a66; border-radius: 50%; }
+  .sc-arc { position: absolute; width: 60px; height: 30px; border: 1.5px solid transparent; border-top-color: #58c48f; border-radius: 50%/100% 100% 0 0; animation: sc-glow 1.8s ease-in-out infinite; }
+  @keyframes sc-spin { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+  .sc-fluid { background: linear-gradient(115deg, #0a0a14, #131032, #0a1f28, #0a0a14); background-size: 300% 300%; animation: sc-aurora 6s ease-in-out infinite; display:flex; align-items:flex-end; padding: 14px; }
+  @keyframes sc-aurora { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  .sc-cap { font-size: 10px; color: #8a93a8; font-family: -apple-system, sans-serif; position: absolute; bottom: 8px; left: 12px; }
+</style>
+
+<h2>What should the 3D scene be?</h2>
+<p class="subtitle">This is the site's soul — the hero renders it full-screen, and it can persist behind sections as you scroll. Each option reacts to cursor and scroll. Click your favorite.</p>
+
+<div class="options">
+  <div class="option" data-choice="network" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Living distributed system — 3D node graph</h3>
+      <div class="sc-mock sc-net">
+        <div class="sc-node" style="top:30%;left:22%"></div>
+        <div class="sc-node g" style="top:55%;left:45%;animation-delay:.5s"></div>
+        <div class="sc-node" style="top:25%;left:62%;animation-delay:1s"></div>
+        <div class="sc-node g" style="top:65%;left:75%;animation-delay:1.5s"></div>
+        <div class="sc-node" style="top:70%;left:15%;animation-delay:.8s"></div>
+        <div class="sc-edge" style="top:33%;left:23%;width:150px;transform:rotate(28deg)"></div>
+        <div class="sc-edge" style="top:57%;left:46%;width:130px;transform:rotate(-22deg);animation-delay:.6s"></div>
+        <div class="sc-edge" style="top:28%;left:63%;width:110px;transform:rotate(38deg);animation-delay:1.1s"></div>
+        <div class="sc-edge" style="top:72%;left:17%;width:160px;transform:rotate(-8deg);animation-delay:.3s"></div>
+        <div class="sc-cap">nodes = services · pulses = events · cursor bends the graph</div>
+      </div>
+      <p>A floating network of glowing nodes with event-pulses traveling the edges — literally what you build for a living. Cursor attracts/repels nodes; scrolling into a case study reconfigures the graph into <em>that system's</em> architecture. The 3D scene and the C-style case studies become one continuous machine.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="particles" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Morphing particle field</h3>
+      <div class="sc-mock sc-morph">
+        <div class="sc-letters"><span>S</span><span>A</span><span>T</span><span>V</span><span>I</span><span>K</span></div>
+      </div>
+      <p>Tens of thousands of particles that assemble into your name, then scatter and reform into shapes as you scroll (a globe, a graph, section titles). Cursor repels particles like a force field. Very cinematic, very "wow reel" — the metaphor is looser than A, it's beauty for beauty's sake.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="globe" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Planet-scale — wireframe globe with live arcs</h3>
+      <div class="sc-mock sc-globe">
+        <div class="sc-sphere"><div class="sc-lat"></div></div>
+        <div class="sc-arc" style="top:35%;left:30%"></div>
+        <div class="sc-arc" style="top:48%;left:42%;animation-delay:.7s"></div>
+        <div class="sc-cap">6 production regions · arcs = cross-region event streams</div>
+      </div>
+      <p>A rotating wireframe Earth with your 6 production regions marked, event-stream arcs firing between them (the GitHub-homepage globe, but it's <em>your</em> infrastructure). Drag to spin, hover a region for stats. Strong "I operate at global scale" message; slightly more familiar/less novel than A.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="shader" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>Abstract shader — aurora / fluid field</h3>
+      <div class="sc-mock sc-fluid">
+        <div class="sc-cap" style="position:static">GPU fluid reacts to cursor like disturbing water</div>
+      </div>
+      <p>A full-screen GLSL shader — flowing aurora/ink that warps around the cursor and shifts hue per section. Most elegant and least literal; the site feels like art. Lightest to run of the four, but says "designer" more than "systems engineer".</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p class="subtitle"><strong>My recommendation: A (node graph).</strong> Maximum wow <em>and</em> maximum argument — the showpiece is a simulation of the thing you're hired to build, and it merges naturally with the scrollytelling case studies you also liked. B is the runner-up if you want pure spectacle.</p>
+</div>

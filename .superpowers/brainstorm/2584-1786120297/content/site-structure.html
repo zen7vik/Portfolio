@@ -1,0 +1,63 @@
+<style>
+  .st-wire { border-radius: 8px; border: 1px solid rgba(128,128,128,.3); background: #0a0b12; padding: 10px; margin-bottom: 12px; font-family: -apple-system, sans-serif; }
+  .st-block { border: 1px dashed #3a4258; border-radius: 5px; color: #9aa3b8; font-size: 10px; padding: 7px 9px; margin: 5px 0; background: #10131d; }
+  .st-hero { background: radial-gradient(ellipse at 50% 50%, #1b1f3a 0%, #0b0d18 80%); border-style: solid; color: #cdd3ff; text-align: center; padding: 16px 9px; }
+  .st-row { display: flex; gap: 5px; }
+  .st-row .st-block { flex: 1; margin: 5px 0 0 0; }
+  .st-tag { display: inline-block; font-size: 9px; color: #58c48f; border: 1px solid #2a4a3a; border-radius: 3px; padding: 1px 5px; margin-left: 6px; vertical-align: 1px; }
+  .st-arrow { text-align: center; color: #4a5268; font-size: 11px; margin: 2px 0; }
+</style>
+
+<h2>How should the site be structured?</h2>
+<p class="subtitle">The particle scene is the constant; this decides where the depth lives. Click one.</p>
+
+<div class="options">
+  <div class="option" data-choice="single" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>One epic page — the journey</h3>
+      <div class="st-wire">
+        <div class="st-block st-hero">PARTICLES form "SATVIK" · tagline · scroll cue</div>
+        <div class="st-block">About strip — particles reform into a globe behind stats <span class="st-tag">particles morph</span></div>
+        <div class="st-block">Case study 1: Risk engine — pinned scrollytelling diagram <span class="st-tag">particles morph</span></div>
+        <div class="st-block">Case study 2 · Case study 3 (same treatment)</div>
+        <div class="st-block">Projects + Writing cards</div>
+        <div class="st-block">Contact — particles swirl into an @ sign · resume download</div>
+      </div>
+      <p>Everything on one continuous scroll; the particle field morphs at every section boundary. Most cinematic — one unbroken performance. Cons: a long, heavy page (WebGL + several pinned sequences); case studies can't be linked individually; depth is capped or the page becomes exhausting.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="hub" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Showpiece landing + deep-dive case pages</h3>
+      <div class="st-wire">
+        <div class="st-block st-hero">LANDING: particles + about + 3 case study CARDS + contact</div>
+        <div class="st-arrow">↓ click a card — particles dissolve into the next page</div>
+        <div class="st-row">
+          <div class="st-block">/work/risk-engine<br>full scrollytelling</div>
+          <div class="st-block">/work/data-exchange<br>full scrollytelling</div>
+          <div class="st-block">/work/rag-pipeline<br>full scrollytelling</div>
+        </div>
+      </div>
+      <p>Landing stays fast and jaw-dropping; each case study is its own page with room for real depth (animated architecture, metrics, "what I'd do differently"). Individually shareable links for recruiters; page transitions become another wow moment. Cons: more pages to build; some visitors never click through.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="hybrid" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Hybrid — full story on one page, expandable depth</h3>
+      <div class="st-wire">
+        <div class="st-block st-hero">One page like A, but each case study is a teaser…</div>
+        <div class="st-block">Case study teaser → "expand" opens an immersive overlay with the full deep-dive <span class="st-tag">overlay</span></div>
+      </div>
+      <p>Single-page flow with case studies expanding in-place (full-screen overlay). Middle ground on effort and depth. Cons: overlays are fiddly on mobile, deep-links are hackier, and it's the least conventional to navigate.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p class="subtitle"><strong>My recommendation: B.</strong> A recruiter gets the wow + full story in 60 seconds on the landing page; a hiring manager gets shareable, deep case studies. It also keeps the heavy scrollytelling off the landing page, so the particle scene stays at 60fps.</p>
+</div>

@@ -1,0 +1,22 @@
+import type { Metadata } from 'next'
+import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google'
+import { site } from '@/lib/site'
+import '@/styles/globals.css'
+
+const display = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' })
+const body = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains' })
+
+export const metadata: Metadata = {
+  title: site.title,
+  description: site.description,
+  metadataBase: new URL('https://satvik.vercel.app'),
+}
+
+export default function RootLayout({ children }: LayoutProps<'/'>) {
+  return (
+    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+      <body>{children}</body>
+    </html>
+  )
+}
