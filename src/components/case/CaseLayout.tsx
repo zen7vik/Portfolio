@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import TransitionLink from '@/components/scene/TransitionLink'
 import CaseSceneSetter from '@/components/case/CaseSceneSetter'
 import Reveal from '@/components/ui/Reveal'
 import type { CaseMeta } from '@/lib/content'
@@ -23,9 +23,9 @@ export default function CaseLayout({
       <CaseSceneSetter accent={accent} />
       <nav className="sticky top-0 z-20 border-b border-fg/10 bg-bg/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 md:px-12">
-          <Link href="/" className="font-mono text-sm text-muted transition-colors hover:text-fg">
+          <TransitionLink href="/" className="font-mono text-sm text-muted transition-colors hover:text-fg">
             ← satvik
-          </Link>
+          </TransitionLink>
           <span className="font-mono text-xs text-muted/70">work / {meta.slug}</span>
         </div>
       </nav>
@@ -58,18 +58,18 @@ export default function CaseLayout({
       <footer className="mx-auto max-w-5xl border-t border-fg/10 px-6 py-12 md:px-12">
         <div className="flex items-center justify-between gap-6">
           {prev ? (
-            <Link href={`/work/${prev.slug}`} className="group max-w-[45%]">
+            <TransitionLink href={`/work/${prev.slug}`} className="group max-w-[45%]">
               <span className="font-mono text-xs text-muted">← previous</span>
               <p className="mt-1 font-display font-semibold transition-colors group-hover:text-indigo">{prev.title}</p>
-            </Link>
+            </TransitionLink>
           ) : (
             <span />
           )}
           {next ? (
-            <Link href={`/work/${next.slug}`} className="group max-w-[45%] text-right">
+            <TransitionLink href={`/work/${next.slug}`} className="group max-w-[45%] text-right">
               <span className="font-mono text-xs text-muted">next →</span>
               <p className="mt-1 font-display font-semibold transition-colors group-hover:text-indigo">{next.title}</p>
-            </Link>
+            </TransitionLink>
           ) : (
             <span />
           )}

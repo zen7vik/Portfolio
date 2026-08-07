@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { setScene } from '@/components/scene/sceneStore'
+import TransitionLink from '@/components/scene/TransitionLink'
 import type { CaseMeta } from '@/lib/content'
 
 export default function WorkCard({ meta, index }: { meta: CaseMeta; index: number }) {
@@ -9,7 +9,7 @@ export default function WorkCard({ meta, index }: { meta: CaseMeta; index: numbe
   const accentText = meta.accent === 'green' ? 'text-green' : 'text-indigo'
 
   return (
-    <Link
+    <TransitionLink
       href={`/work/${meta.slug}`}
       className="group block"
       onMouseEnter={() => setScene({ intensity: 1.6 })}
@@ -34,6 +34,6 @@ export default function WorkCard({ meta, index }: { meta: CaseMeta; index: numbe
           ))}
         </div>
       </article>
-    </Link>
+    </TransitionLink>
   )
 }
