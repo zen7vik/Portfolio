@@ -92,15 +92,16 @@ export default function Particles({ count }: { count: number }) {
     geometry.setAttribute('aTarget', new THREE.BufferAttribute(target, 3))
     geometry.setAttribute('aRand', new THREE.BufferAttribute(rand, 1))
 
+    const initial = getScene()
     const uniforms = {
       uTime: { value: 0 },
       uMorph: { value: 0 },
       uBurst: { value: 0 },
-      uIntensity: { value: 1 },
+      uIntensity: { value: initial.intensity },
       uPointer: { value: new THREE.Vector3(99, 99, 0) },
       uSize: { value: 9 },
       uColBase: { value: new THREE.Color('#e8e8ea') },
-      uAccent: { value: new THREE.Color('#7c8cff') },
+      uAccent: { value: new THREE.Color(initial.accent) },
     }
 
     // Built imperatively so material.uniforms IS this object (R3F's

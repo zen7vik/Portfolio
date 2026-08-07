@@ -33,6 +33,13 @@ body {
     0 0 32px rgba(10, 10, 15, 0.8);
 }
 
+/* animated flow along active diagram edges */
+@keyframes diagram-flow {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+
 /* scene fades in over the static gradient once WebGL is live */
 .scene-fade-in {
   animation: scene-fade 1.2s ease-out both;
