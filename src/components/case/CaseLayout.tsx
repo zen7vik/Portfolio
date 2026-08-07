@@ -1,9 +1,18 @@
 import TransitionLink from '@/components/scene/TransitionLink'
 import CaseSceneSetter from '@/components/case/CaseSceneSetter'
+import type { Formation } from '@/components/scene/formations'
 import Reveal from '@/components/ui/Reveal'
 import type { CaseMeta } from '@/lib/content'
 
-const ACCENTS = { indigo: '#7c8cff', green: '#58c48f' } as const
+const ACCENTS = { indigo: '#7c8cff', green: '#58c48f', amber: '#f0b35e', rose: '#f27a8a' } as const
+
+// every case page gets its own particle shape
+const CASE_FORMATIONS: Record<string, Formation> = {
+  'workflow-platform': 'helix',
+  'risk-engine': 'wave',
+  'rag-pipeline': 'torus',
+  'data-exchange': 'twin',
+}
 
 export default function CaseLayout({
   meta,
@@ -17,10 +26,11 @@ export default function CaseLayout({
   children: React.ReactNode
 }) {
   const accent = ACCENTS[meta.accent]
+  const formation = CASE_FORMATIONS[meta.slug] ?? 'ambient'
 
   return (
     <main className="text-scrim">
-      <CaseSceneSetter accent={accent} />
+      <CaseSceneSetter accent={accent} formation={formation} />
       <nav className="sticky top-0 z-20 border-b border-fg/10 bg-bg/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 md:px-12">
           <TransitionLink href="/" className="font-mono text-sm text-muted transition-colors hover:text-fg">

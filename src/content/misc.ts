@@ -6,10 +6,10 @@ export type MiscItem = {
 
 export const miscItems: MiscItem[] = [
   {
-    title: 'Questionnaire AI review',
+    title: 'InvestIQ (stockApp)',
     blurb:
-      'LLM-assisted review of vendor questionnaire answers against uploaded evidence, flagging contradictions before an analyst ever reads them.',
-    tags: ['LLM', 'RAG', 'TPRM'],
+      'My ET Money subscription lapsed, so I built the thing myself: multi-factor stock scoring, ML predictions, portfolio optimization, SIP planning, swing signals, and an automated trading engine with 6-layer risk validation. Dockerized PWA.',
+    tags: ['Python', 'React', 'ML', 'trading'],
   },
   {
     title: 'graphify',
@@ -28,11 +28,5 @@ export const miscItems: MiscItem[] = [
     blurb:
       'Incident tooling that pulls alerts, traces, and logs into one triage flow, plus automated daily alert summaries per service.',
     tags: ['observability', 'incident response'],
-  },
-  {
-    title: 'InvestIQ',
-    blurb:
-      'Personal AI investment platform: automated trading engine with 6-layer risk validation, XGBoost ensemble with walk-forward validation, FinBERT sentiment, HRP portfolio optimization.',
-    tags: ['Python', 'ML', 'personal'],
   },
 ]

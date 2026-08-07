@@ -10,7 +10,7 @@ export type CaseMeta = {
   hook: string
   role: string
   period: string
-  accent: 'indigo' | 'green'
+  accent: 'indigo' | 'green' | 'amber' | 'rose'
   stats: { value: string; label: string }[]
   summary: string
   order: number

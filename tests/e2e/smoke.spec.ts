@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 test('landing renders hero and all sections', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('h1')).toContainText('Satvik')
-  for (const id of ['about', 'work', 'misc', 'writing', 'contact']) {
+  for (const id of ['about', 'work', 'personal', 'writing', 'contact']) {
     await expect(page.locator(`#${id}`)).toBeAttached()
   }
 })

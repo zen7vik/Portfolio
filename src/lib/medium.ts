@@ -3,10 +3,17 @@ import fallback from '@/content/writing-fallback.json'
 import { site } from '@/lib/site'
 
 export type Post = {
+  id: string
   title: string
   url: string
   publishedAt: string
   readingMinutes: number
+  /** full post body from the RSS feed; absent on fallback data */
+  contentHtml?: string
+}
+
+function sanitize(html: string): string {
+  return html.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/\son\w+="[^"]*"/gi, '')
 }
 
 export function parseMediumFeed(xml: string): Post[] {
@@ -19,14 +26,17 @@ export function parseMediumFeed(xml: string): Post[] {
         const html = String(it['content:encoded'] ?? '')
         const words = html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length
         const date = new Date(String(it.pubDate ?? ''))
+        const url = String(it.link ?? '').split('?')[0]
         return {
+          id: url.split('-').pop() ?? '',
           title: String(it.title ?? ''),
-          url: String(it.link ?? '').split('?')[0],
+          url,
           publishedAt: Number.isNaN(date.getTime()) ? '' : date.toISOString(),
           readingMinutes: Math.max(1, Math.round(words / 200)),
+          contentHtml: sanitize(html),
         }
       })
-      .filter((p) => p.title && p.url && p.publishedAt)
+      .filter((p) => p.id && p.title && p.url && p.publishedAt)
   } catch {
     return []
   }

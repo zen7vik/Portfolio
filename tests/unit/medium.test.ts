@@ -16,6 +16,14 @@ describe('parseMediumFeed', () => {
     expect(posts[1].readingMinutes).toBe(1)
   })
 
+  it('extracts a stable id and full content html', () => {
+    const posts = parseMediumFeed(xml)
+    expect(posts[0].id).toBe('abc123')
+    expect(posts[1].id).toBe('def456')
+    expect(posts[0].contentHtml).toContain('<p>')
+    expect(posts[0].contentHtml).not.toContain('<script')
+  })
+
   it('returns [] on garbage input', () => {
     expect(parseMediumFeed('<not-rss/>')).toEqual([])
     expect(parseMediumFeed('not xml at all')).toEqual([])

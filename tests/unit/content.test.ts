@@ -17,7 +17,7 @@ describe('content', () => {
       expect(c.hook.length).toBeGreaterThan(10)
       expect(c.stats.length).toBeGreaterThanOrEqual(2)
       expect(c.summary.length).toBeGreaterThan(20)
-      expect(['indigo', 'green']).toContain(c.accent)
+      expect(['indigo', 'green', 'amber', 'rose']).toContain(c.accent)
     }
   })
 

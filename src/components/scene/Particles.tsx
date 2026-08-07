@@ -100,7 +100,7 @@ export default function Particles({ count }: { count: number }) {
       uIntensity: { value: initial.intensity },
       uPointer: { value: new THREE.Vector3(99, 99, 0) },
       uSize: { value: window.innerWidth < 768 ? 5.5 : 9 },
-      uColBase: { value: new THREE.Color('#e8e8ea') },
+      uColBase: { value: new THREE.Color('#f2efe9') },
       uAccent: { value: new THREE.Color(initial.accent) },
     }
 

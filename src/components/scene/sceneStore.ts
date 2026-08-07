@@ -3,7 +3,7 @@ import type { Formation } from '@/components/scene/formations'
 export type SceneState = {
   formation: Formation
   intensity: number
-  accent: '#7c8cff' | '#58c48f'
+  accent: string
   burst: number
 }
 

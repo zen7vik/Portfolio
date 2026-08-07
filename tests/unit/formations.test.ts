@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ambient, lattice, sphere, vortex } from '@/components/scene/formations'
+import { ambient, helix, lattice, sphere, torus, twin, vortex, wave } from '@/components/scene/formations'
 
 const COUNT = 4096
 
@@ -8,6 +8,10 @@ describe.each([
   ['sphere', sphere],
   ['lattice', lattice],
   ['vortex', vortex],
+  ['helix', helix],
+  ['wave', wave],
+  ['torus', torus],
+  ['twin', twin],
 ] as const)('%s formation', (_name, fn) => {
   const arr = fn(COUNT)
 

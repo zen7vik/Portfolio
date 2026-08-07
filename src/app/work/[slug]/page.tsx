@@ -5,7 +5,7 @@ import CaseLayout from '@/components/case/CaseLayout'
 import Scrolly from '@/components/case/Scrolly'
 import { getAllCases, getCase } from '@/lib/content'
 
-const ACCENTS = { indigo: '#7c8cff', green: '#58c48f' } as const
+const ACCENTS = { indigo: '#7c8cff', green: '#58c48f', amber: '#f0b35e', rose: '#f27a8a' } as const
 
 export function generateStaticParams() {
   return getAllCases().map((c) => ({ slug: c.slug }))

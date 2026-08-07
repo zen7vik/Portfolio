@@ -1,3 +1,4 @@
+import GlowRow from '@/components/ui/GlowRow'
 import Reveal from '@/components/ui/Reveal'
 import { site } from '@/lib/site'
 
@@ -9,12 +10,14 @@ export default function Contact() {
         <h2 className="mt-4 font-display text-5xl font-bold tracking-tight md:text-7xl">Let's talk</h2>
       </Reveal>
       <Reveal delay={0.15}>
-        <a
-          href={`mailto:${site.email}`}
-          className="mt-8 inline-block break-all font-display text-2xl text-muted underline decoration-fg/20 underline-offset-8 transition-colors hover:text-fg md:text-4xl"
-        >
-          {site.email}
-        </a>
+        <GlowRow accent="#f27a8a" intensity={1.7} className="inline-block">
+          <a
+            href={`mailto:${site.email}`}
+            className="mt-8 inline-block break-all font-display text-2xl text-muted underline decoration-fg/20 underline-offset-8 transition-colors hover:text-rose md:text-4xl"
+          >
+            {site.email}
+          </a>
+        </GlowRow>
       </Reveal>
       <Reveal delay={0.25}>
         <div className="mt-12 flex flex-wrap gap-6 font-mono text-sm text-muted">

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google'
+import { Bricolage_Grotesque, IBM_Plex_Mono, Instrument_Sans } from 'next/font/google'
 import SceneCanvas from '@/components/scene/SceneCanvas'
 import SmoothScroll from '@/components/providers/SmoothScroll'
 import HotkeyMount from '@/components/terminal/HotkeyMount'
@@ -7,9 +7,9 @@ import { getAllCases } from '@/lib/content'
 import { site } from '@/lib/site'
 import '@/styles/globals.css'
 
-const display = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' })
-const body = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains' })
+const display = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-display-face' })
+const body = Instrument_Sans({ subsets: ['latin'], variable: '--font-body-face' })
+const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-mono-face' })
 
 export const metadata: Metadata = {
   title: site.title,
