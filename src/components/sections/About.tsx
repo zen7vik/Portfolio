@@ -14,7 +14,7 @@ const skillGroups: { label: string; items: string[] }[] = [
 
 export default function About() {
   return (
-    <section id="about" className="mx-auto max-w-6xl px-6 py-32 md:px-16">
+    <section id="about" className="text-scrim mx-auto max-w-6xl px-6 py-32 md:px-16">
       <SectionHeading eyebrow="About" title="Systems that hold up in production" />
       <div className="mt-14 grid gap-14 md:grid-cols-2">
         <Reveal>

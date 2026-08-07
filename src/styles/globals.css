@@ -26,6 +26,13 @@ body {
   color: #0a0a0f;
 }
 
+/* lifts text off the particle field without a heavy backdrop */
+.text-scrim {
+  text-shadow:
+    0 1px 12px rgba(10, 10, 15, 0.95),
+    0 0 32px rgba(10, 10, 15, 0.8);
+}
+
 /* scene fades in over the static gradient once WebGL is live */
 .scene-fade-in {
   animation: scene-fade 1.2s ease-out both;

@@ -4,7 +4,7 @@ import { miscItems } from '@/content/misc'
 
 export default function Misc() {
   return (
-    <section id="misc" className="mx-auto max-w-6xl px-6 py-32 md:px-16">
+    <section id="misc" className="text-scrim mx-auto max-w-6xl px-6 py-32 md:px-16">
       <SectionHeading eyebrow="Also built" title="The horizontal work" />
       <div className="mt-14 divide-y divide-fg/10">
         {miscItems.map((item, i) => (

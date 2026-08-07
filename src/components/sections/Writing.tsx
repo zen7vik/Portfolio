@@ -10,7 +10,7 @@ function formatDate(iso: string): string {
 
 export default function Writing({ posts }: { posts: Post[] }) {
   return (
-    <section id="writing" className="mx-auto max-w-6xl px-6 py-32 md:px-16">
+    <section id="writing" className="text-scrim mx-auto max-w-6xl px-6 py-32 md:px-16">
       <SectionHeading eyebrow="Writing" title="Things I've written down" />
       <div className="mt-14 space-y-1">
         {posts.length === 0 ? (

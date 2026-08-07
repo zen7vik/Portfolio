@@ -1,3 +1,4 @@
+import SectionMorpher from '@/components/scene/SectionMorpher'
 import About from '@/components/sections/About'
 import Contact from '@/components/sections/Contact'
 import Hero from '@/components/sections/Hero'
@@ -13,6 +14,7 @@ export default async function Home() {
 
   return (
     <main>
+      <SectionMorpher />
       <Hero />
       <About />
       <Work cases={cases} />

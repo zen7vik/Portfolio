@@ -12,8 +12,8 @@ export default function WorkCard({ meta, index }: { meta: CaseMeta; index: numbe
     <Link
       href={`/work/${meta.slug}`}
       className="group block"
-      onMouseEnter={() => setScene({ intensity: 1.8 })}
-      onMouseLeave={() => setScene({ intensity: 1 })}
+      onMouseEnter={() => setScene({ intensity: 1.6 })}
+      onMouseLeave={() => setScene({ intensity: 0.7 })}
     >
       <article
         className={`rounded-2xl border border-fg/10 bg-bg/60 p-8 backdrop-blur-sm transition-all duration-300 group-hover:-translate-y-1 ${accentClass}`}

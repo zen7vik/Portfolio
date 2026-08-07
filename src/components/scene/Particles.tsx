@@ -62,7 +62,8 @@ const fragmentShader = /* glsl */ `
     if (r > 0.5) discard;
     float alpha = smoothstep(0.5, 0.05, r) * (0.55 + 0.45 * vRand);
     vec3 col = mix(uColBase, uAccent, vRand * vRand);
-    gl_FragColor = vec4(col * (0.85 + 0.3 * uIntensity), alpha * 0.35);
+    float dim = clamp(0.12 + 0.88 * uIntensity, 0.0, 1.3);
+    gl_FragColor = vec4(col * (0.85 + 0.3 * uIntensity), alpha * 0.35 * dim);
   }
 `
 

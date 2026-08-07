@@ -3,7 +3,7 @@ import { site } from '@/lib/site'
 
 export default function Contact() {
   return (
-    <section id="contact" className="mx-auto max-w-6xl px-6 pb-16 pt-32 md:px-16">
+    <section id="contact" className="text-scrim mx-auto max-w-6xl px-6 pb-16 pt-32 md:px-16">
       <Reveal>
         <p className="font-mono text-xs uppercase tracking-[0.25em] text-indigo">Contact</p>
         <h2 className="mt-4 font-display text-5xl font-bold tracking-tight md:text-7xl">Let's talk</h2>
