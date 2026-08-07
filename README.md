@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# satvik.dev (portfolio)
 
-## Getting Started
+Personal portfolio: a WebGL morphing-particle landing page, deep-dive case studies with scroll-driven architecture diagrams, a Medium-powered writing section, and a terminal easter egg (press `~`) with a `⌘K` command palette.
 
-First, run the development server:
+## Stack
+
+- Next.js (App Router, TypeScript), Tailwind CSS v4
+- three + @react-three/fiber (persistent particle scene, custom GLSL)
+- GSAP + ScrollTrigger, Lenis (smooth scroll, scrollytelling)
+- MDX case studies (`src/content/work/`), Medium RSS at build time with committed fallback
+
+## Develop
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3000
+npm test             # vitest unit tests
+npm run test:e2e     # playwright smoke suite (builds + starts on :3100)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Content lives in `src/content/` (case MDX, misc items, writing fallback). Site constants (links, stats, tagline) in `src/lib/site.ts`. Diagram steps in `src/components/case/registry.ts`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploy
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Vercel: import the GitHub repo, no configuration needed. `npm run build` is the CI gate.
 
-## Learn More
+## Accessibility & fallbacks
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `prefers-reduced-motion`: static hero, no particle drift, fades instead of scroll animation
+- No WebGL: gradient hero with typographic name
+- Terminal/palette are optional layers; every page works by scrolling alone
