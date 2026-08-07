@@ -12,9 +12,11 @@ type RevealProps = {
   children: React.ReactNode
   delay?: number
   className?: string
+  /** reveal on a timer instead of on scroll (for above-the-fold content) */
+  immediate?: boolean
 }
 
-export default function Reveal({ children, delay = 0, className }: RevealProps) {
+export default function Reveal({ children, delay = 0, className, immediate = false }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   useGSAP(
@@ -29,7 +31,7 @@ export default function Reveal({ children, delay = 0, className }: RevealProps) 
           duration: 0.9,
           delay,
           ease: 'power3.out',
-          scrollTrigger: { trigger: ref.current, start: 'top 85%' },
+          ...(immediate ? {} : { scrollTrigger: { trigger: ref.current, start: 'top 85%' } }),
         },
       )
     },
