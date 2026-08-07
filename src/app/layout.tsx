@@ -15,6 +15,18 @@ export const metadata: Metadata = {
   title: site.title,
   description: site.description,
   metadataBase: new URL('https://satvik.vercel.app'),
+  openGraph: {
+    title: site.title,
+    description: site.description,
+    type: 'website',
+    images: [{ url: '/og.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: site.title,
+    description: site.description,
+    images: ['/og.png'],
+  },
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

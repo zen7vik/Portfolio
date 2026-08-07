@@ -15,7 +15,13 @@ export async function generateMetadata({ params }: PageProps<'/work/[slug]'>): P
   const { slug } = await params
   try {
     const { meta } = getCase(slug)
-    return { title: `${meta.title}, Satvik Singh`, description: meta.hook }
+    const title = `${meta.title}, Satvik Singh`
+    return {
+      title,
+      description: meta.hook,
+      openGraph: { title, description: meta.hook, type: 'article', images: [{ url: '/og.png', width: 1200, height: 630 }] },
+      twitter: { card: 'summary_large_image', title, description: meta.hook, images: ['/og.png'] },
+    }
   } catch {
     return {}
   }
