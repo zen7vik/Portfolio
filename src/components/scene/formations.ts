@@ -88,11 +88,18 @@ export function sampleText(
   if (!pts.length) return ambient(count)
   const arr = new Float32Array(count * 3)
   const scale = 9 / W
-  for (let i = 0; i < count; i++) {
+  // ~70% of particles form the glyphs; the rest hang back as a sparse halo
+  const glyphCount = Math.floor(count * 0.7)
+  for (let i = 0; i < glyphCount; i++) {
     const [x, y] = pts[Math.floor(Math.random() * pts.length)]
     arr[i * 3] = (x - W / 2) * scale + (Math.random() - 0.5) * 0.03
     arr[i * 3 + 1] = -(y - H / 2) * scale + (Math.random() - 0.5) * 0.03
     arr[i * 3 + 2] = (Math.random() - 0.5) * 0.3
+  }
+  for (let i = glyphCount; i < count; i++) {
+    arr[i * 3] = (Math.random() - 0.5) * 11
+    arr[i * 3 + 1] = (Math.random() - 0.5) * 7
+    arr[i * 3 + 2] = (Math.random() - 0.5) * 5 - 1.5
   }
   return arr
 }

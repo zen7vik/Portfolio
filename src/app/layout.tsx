@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google'
+import SceneCanvas from '@/components/scene/SceneCanvas'
 import SmoothScroll from '@/components/providers/SmoothScroll'
 import { site } from '@/lib/site'
 import '@/styles/globals.css'
@@ -18,7 +19,12 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
-        <SmoothScroll>{children}</SmoothScroll>
+        <SceneCanvas />
+        <SmoothScroll>
+          <div id="page-root" className="relative z-10">
+            {children}
+          </div>
+        </SmoothScroll>
       </body>
     </html>
   )

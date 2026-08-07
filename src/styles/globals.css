@@ -25,3 +25,60 @@ body {
   background: #7c8cff;
   color: #0a0a0f;
 }
+
+/* scene fades in over the static gradient once WebGL is live */
+.scene-fade-in {
+  animation: scene-fade 1.2s ease-out both;
+}
+
+@keyframes scene-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* hero title is carried by the particles; shown as text when the scene is off */
+.hero-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+html.no-scene .hero-title {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 12vw, 9rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-title {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 12vw, 9rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+}
