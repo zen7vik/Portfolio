@@ -32,9 +32,10 @@ export default function About() {
               />
             )}
             <p>
-              I'm a backend engineer with 3 years building Go and TypeScript microservices for enterprise
+              I'm a fullstack AI engineer with 3 years building Go and TypeScript systems for enterprise
               cyber-risk platforms. I've founded two services from scratch and now own the risk-scoring engine
-              and the workflow automation platform at Safe Security.
+              and the workflow automation platform at Safe Security, from React workflow builders down to LLM
+              pipelines and the infrastructure underneath.
             </p>
             <p>
               My work lives where correctness meets scale: event-driven pipelines, multi-tenant data isolation,

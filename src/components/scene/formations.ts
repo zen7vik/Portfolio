@@ -156,9 +156,10 @@ export function helix(count: number): Float32Array {
     const t = (i / count) * Math.PI * 6
     const strand = i % 2
     const phase = t + strand * Math.PI
-    arr[i * 3] = (i / count - 0.5) * 10 + (Math.random() - 0.5) * 0.2
-    arr[i * 3 + 1] = Math.sin(phase) * 1.7 + (Math.random() - 0.5) * 0.25
-    arr[i * 3 + 2] = Math.cos(phase) * 1.7 + (Math.random() - 0.5) * 0.25
+    // wide jitter keeps the additive blend from whiting out along the strands
+    arr[i * 3] = (i / count - 0.5) * 11 + (Math.random() - 0.5) * 0.5
+    arr[i * 3 + 1] = Math.sin(phase) * 1.8 + (Math.random() - 0.5) * 0.8
+    arr[i * 3 + 2] = Math.cos(phase) * 1.8 + (Math.random() - 0.5) * 0.8
   }
   return arr
 }

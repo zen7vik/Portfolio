@@ -21,7 +21,7 @@ await page.setContent(`
 <div class="dots"></div>
 <div>
   <h1>Satvik Singh<span>.</span></h1>
-  <p class="tag">Backend engineer. I build distributed systems that don't fall over.</p>
+  <p class="tag">Fullstack AI engineer. I build distributed systems that don't fall over.</p>
 </div>
 <div class="stats">
   <span class="pill"><b>500M</b> events/mo</span>

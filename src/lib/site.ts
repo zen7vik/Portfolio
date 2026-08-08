@@ -1,9 +1,9 @@
 export const site = {
   name: 'Satvik Singh',
   title: 'Satvik Singh, Backend Engineer',
-  tagline: "Backend engineer. I build distributed systems that don't fall over.",
+  tagline: "Fullstack AI engineer. I build distributed systems that don't fall over.",
   description:
-    'Go microservices, distributed systems, and the platforms behind them: risk scoring at 500M events/month, workflow automation at 147K runs/month.',
+    'Distributed systems, AI pipelines, and the platforms behind them: risk scoring at 500M events/month, workflow automation at 147K runs/month.',
   email: 'satvik19nitm@gmail.com',
   github: 'https://github.com/zen7vik',
   medium: 'https://medium.com/@satvik19nitm',

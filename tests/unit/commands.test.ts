@@ -17,7 +17,7 @@ describe('runCommand', () => {
   })
 
   it('whoami describes the engineer', () => {
-    expect(runCommand('whoami', ctx).lines.join(' ')).toContain('Backend engineer')
+    expect(runCommand('whoami', ctx).lines.join(' ')).toContain('Fullstack AI engineer')
   })
 
   it('ls work/ lists case slugs', () => {

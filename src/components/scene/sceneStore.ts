@@ -36,9 +36,12 @@ export function setSceneBase(partial: Partial<Pick<SceneState, 'formation' | 'in
   notify()
 }
 
-/** Return to the current section's resting state (ends a hover). */
+/** Return to the current section's resting state (ends a hover).
+ *  Only intensity and accent: hovers never change the formation, so
+ *  restoring one must never trigger a morph either. */
 export function restoreSceneBase(): void {
-  Object.assign(state, base)
+  state.intensity = base.intensity
+  state.accent = base.accent
   notify()
 }
 

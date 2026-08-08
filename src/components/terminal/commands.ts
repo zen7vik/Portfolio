@@ -34,7 +34,7 @@ export function runCommand(input: string, ctx: CmdContext): CmdResult {
       return {
         lines: [
           'Satvik Singh',
-          'Backend engineer · Go · distributed systems',
+          'Fullstack AI engineer · Go · TypeScript · distributed systems',
           '500M events/mo scoring engine · 147K workflows/mo platform · 6 regions',
         ],
       }

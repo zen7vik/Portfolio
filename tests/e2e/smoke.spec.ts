@@ -25,7 +25,7 @@ test('terminal opens, runs commands, navigates', async ({ page }) => {
   await expect(input).toBeVisible()
   await input.fill('whoami')
   await page.keyboard.press('Enter')
-  await expect(page.getByText('Backend engineer · Go · distributed systems')).toBeVisible()
+  await expect(page.getByText('Fullstack AI engineer · Go · TypeScript · distributed systems')).toBeVisible()
   await input.fill('open risk-engine')
   await page.keyboard.press('Enter')
   await expect(page).toHaveURL(/work\/risk-engine/)
