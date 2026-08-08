@@ -35,12 +35,18 @@ const vertexShader = /* glsl */ `
     pos.y += cos(t * 1.3 + pos.x * 1.4 + aRand * 6.28) * 0.05 * uIntensity;
     pos.z += sin(t * 0.8 + pos.x + pos.y) * 0.04 * uIntensity;
 
-    // pointer repulsion: spherical falloff so the void reads as a lens/black
-    // hole everywhere on screen instead of a cylinder through the depth
-    vec3 toPointer = pos - uPointer;
-    float d = length(toPointer);
-    float force = smoothstep(1.5, 0.0, d);
-    pos += normalize(toPointer + 0.0001) * force * force * 0.9;
+    // pointer repulsion: push away from the camera->cursor sight line, so the
+    // void tracks the cursor at every depth (front of a sphere included) and
+    // always reads as a hole rather than a plane-locked bubble
+    vec3 camPos = vec3(0.0, 0.0, 8.0);
+    vec3 rayDir = normalize(uPointer - camPos);
+    vec3 toParticle = pos - camPos;
+    float along = max(dot(toParticle, rayDir), 0.0);
+    vec3 closestOnRay = camPos + rayDir * along;
+    vec3 away = pos - closestOnRay;
+    float d = length(away);
+    float force = smoothstep(1.3, 0.0, d);
+    pos += normalize(away + 0.0001) * force * force * 0.9;
 
     // burst impulse outward from origin
     pos += normalize(pos + 0.0001) * uBurst * (0.6 + aRand * 1.2);

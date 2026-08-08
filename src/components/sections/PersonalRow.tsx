@@ -10,7 +10,7 @@ export default function PersonalRow({ item }: { item: MiscItem }) {
   return (
     <div
       className="group"
-      onMouseEnter={() => setScene({ intensity: 0.75, accent: '#f0b35e' })}
+      onMouseEnter={() => setScene({ intensity: 1.25, accent: '#f0b35e' })}
       onMouseLeave={() => restoreSceneBase()}
     >
       <button
