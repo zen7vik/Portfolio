@@ -1,3 +1,5 @@
+import PaletteButton from '@/components/terminal/PaletteButton'
+
 const links = [
   { href: '#about', label: 'About' },
   { href: '#work', label: 'Work' },
@@ -10,8 +12,8 @@ export default function TopNav() {
   return (
     <nav className="fixed inset-x-0 top-0 z-40">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 md:px-16">
-        <a href="#hero" className="font-display text-lg italic tracking-tight text-fg">
-          Satvik Singh
+        <a href="#hero" className="font-mono text-sm lowercase tracking-wide text-muted transition-colors hover:text-fg">
+          satvik
         </a>
         <div className="hidden items-center gap-7 font-mono text-xs uppercase tracking-widest text-muted md:flex">
           {links.map((l) => (
@@ -19,7 +21,7 @@ export default function TopNav() {
               {l.label}
             </a>
           ))}
-          <span className="text-muted/50">⌘K</span>
+          <PaletteButton />
         </div>
       </div>
     </nav>

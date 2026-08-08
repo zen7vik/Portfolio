@@ -30,14 +30,43 @@ export function preloadPortrait(url = '/me.jpg'): void {
     if (!ctx) return
     ctx.drawImage(img, 0, 0, W, H)
     const data = ctx.getImageData(0, 0, W, H).data
+    const px = (x: number, y: number) => {
+      const i = (y * W + x) * 4
+      return [data[i], data[i + 1], data[i + 2]] as const
+    }
+    // estimate the background from the four corner patches, then keep pixels
+    // that differ from it — works for a subject on any background, light or dark
+    let br = 0
+    let bgG = 0
+    let bb = 0
+    let n = 0
+    for (const [cx, cy] of [
+      [0, 0],
+      [W - 9, 0],
+      [0, H - 9],
+      [W - 9, H - 9],
+    ]) {
+      for (let y = cy; y < cy + 9; y++) {
+        for (let x = cx; x < cx + 9; x++) {
+          const [r, g, b] = px(x, y)
+          br += r
+          bgG += g
+          bb += b
+          n++
+        }
+      }
+    }
+    br /= n
+    bgG /= n
+    bb /= n
     const pts: { x: number; y: number; l: number }[] = []
     for (let y = 0; y < H; y += 1) {
       for (let x = 0; x < W; x += 1) {
-        const i = (y * W + x) * 4
-        const lum = (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]) / 255
-        const a = data[i + 3] / 255
-        // keep bright-ish pixels; probability scales with luminance for shading
-        if (a > 0.5 && lum > 0.18 && Math.random() < lum * lum + 0.04) {
+        const [r, g, b] = px(x, y)
+        const dist = Math.sqrt(((r - br) ** 2 + (g - bgG) ** 2 + (b - bb) ** 2) / 3) / 255
+        const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+        // subject = pixels that differ from the background; density follows that difference
+        if (dist > 0.16 && Math.random() < Math.min(1, dist * 1.6)) {
           pts.push({ x: x / W - 0.5, y: 0.5 - y / H, l: lum })
         }
       }
@@ -57,10 +86,10 @@ export function portrait(count: number): Float32Array {
   const H_WORLD = 5.4
   for (let i = 0; i < count; i++) {
     const p = portraitPoints[Math.floor(Math.random() * portraitPoints.length)]
-    arr[i * 3] = p.x * H_WORLD * 0.82 + (Math.random() - 0.5) * 0.04
-    arr[i * 3 + 1] = p.y * H_WORLD + (Math.random() - 0.5) * 0.04
-    // brighter pixels sit closer to the camera for a relief effect
-    arr[i * 3 + 2] = p.l * 0.9 + (Math.random() - 0.5) * 0.15
+    arr[i * 3] = p.x * H_WORLD * 0.82 + (Math.random() - 0.5) * 0.03
+    arr[i * 3 + 1] = p.y * H_WORLD + (Math.random() - 0.5) * 0.03
+    // brighter pixels sit slightly closer to the camera for a relief effect
+    arr[i * 3 + 2] = p.l * 0.5 + (Math.random() - 0.5) * 0.08
   }
   return arr
 }

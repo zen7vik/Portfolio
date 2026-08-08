@@ -18,12 +18,6 @@ export const miscItems: MiscItem[] = [
     tags: ['DevEx', 'knowledge graphs', 'CLI'],
   },
   {
-    title: 'HTTP server hardening',
-    blurb:
-      'A shared Go httpserver package bringing SIGTERM graceful shutdown and sane timeouts to a fleet of microservices, piloted and rolled out service by service.',
-    tags: ['Go', 'reliability', 'platform'],
-  },
-  {
     title: 'On-call triage stack',
     blurb:
       'Incident tooling that pulls alerts, traces, and logs into one triage flow, plus automated daily alert summaries per service.',

@@ -12,14 +12,14 @@ export default function Hero() {
             <p className="font-display text-2xl font-medium leading-snug text-fg md:text-3xl">{site.tagline}</p>
           </Reveal>
           <Reveal immediate delay={1.8}>
-            <p className="mt-6 max-w-lg font-mono text-xs leading-relaxed text-muted">
-              {site.stats.map((s, i) => (
-                <span key={s.label}>
-                  <span className="text-fg">{s.value}</span> {s.label}
-                  {i < site.stats.length - 1 && <span className="mx-2 text-muted/50">·</span>}
-                </span>
+            <div className="mt-8 grid max-w-lg grid-cols-2 gap-x-8 gap-y-5">
+              {site.stats.map((s) => (
+                <div key={s.label}>
+                  <p className="font-display text-2xl font-medium tracking-tight text-fg">{s.value}</p>
+                  <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-muted">{s.label}</p>
+                </div>
               ))}
-            </p>
+            </div>
           </Reveal>
           <Reveal immediate delay={2}>
             <div className="mt-8 flex items-center gap-5">
@@ -31,6 +31,9 @@ export default function Hero() {
               </a>
               <a href={site.linkedin} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-muted transition-colors hover:text-fg">
                 LinkedIn
+              </a>
+              <a href={site.medium} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-muted transition-colors hover:text-fg">
+                Medium
               </a>
             </div>
           </Reveal>

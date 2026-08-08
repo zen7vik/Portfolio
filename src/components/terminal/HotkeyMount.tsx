@@ -19,8 +19,13 @@ export default function HotkeyMount({ cases }: { cases: { slug: string; title: s
         setOverlay((o) => (o === 'palette' ? 'none' : 'palette'))
       }
     }
+    const onOpenPalette = () => setOverlay('palette')
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('open-palette', onOpenPalette)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('open-palette', onOpenPalette)
+    }
   }, [])
 
   if (overlay === 'terminal') return <Terminal cases={cases} onClose={() => setOverlay('none')} />
