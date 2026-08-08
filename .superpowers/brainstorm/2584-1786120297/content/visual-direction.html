@@ -1,0 +1,89 @@
+<style>
+  .vd-mock { border-radius: 8px; overflow: hidden; font-family: -apple-system, sans-serif; margin-bottom: 12px; border: 1px solid rgba(128,128,128,.25); }
+  .vd-dark { background: #0a0a0f; color: #e8e8ea; padding: 18px; }
+  .vd-dark .big { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.15; }
+  .vd-dark .accent { color: #7c8cff; }
+  .vd-muted { color: #8a8a95; font-size: 11px; }
+  .vd-pill { display: inline-block; border: 1px solid #33333d; border-radius: 99px; padding: 3px 10px; font-size: 10px; margin: 3px 3px 0 0; color: #b8b8c0; }
+  .vd-term { background: #0b1020; color: #c9f7d4; font-family: "SF Mono", Menlo, monospace; font-size: 11px; padding: 14px; line-height: 1.7; }
+  .vd-term .prompt { color: #7c8cff; }
+  .vd-term .dim { color: #5a6478; }
+  .vd-cursor { display: inline-block; width: 7px; height: 13px; background: #c9f7d4; vertical-align: middle; animation: vd-blink 1s steps(1) infinite; }
+  @keyframes vd-blink { 50% { opacity: 0; } }
+  .vd-diagram { background: #0d0f14; padding: 16px; position: relative; }
+  .vd-node { display: inline-block; border: 1px solid #3a4258; background: #161a24; color: #d5dae6; border-radius: 6px; padding: 6px 10px; font-size: 10px; font-family: Menlo, monospace; }
+  .vd-flow { color: #58c48f; font-size: 12px; padding: 0 4px; animation: vd-pulse 1.6s ease-in-out infinite; display: inline-block; }
+  @keyframes vd-pulse { 0%,100% { opacity: .25; transform: translateX(0); } 50% { opacity: 1; transform: translateX(3px); } }
+  .vd-scrollhint { font-size: 9px; color: #6b7280; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 10px; }
+  .vd-canvas { background: radial-gradient(circle at 60% 40%, #1b1f3a 0%, #07080f 70%); padding: 22px; text-align: center; color: #dfe3ff; }
+  .vd-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #7c8cff; margin: 2px; animation: vd-float 2.4s ease-in-out infinite; }
+  .vd-dot:nth-child(2n) { animation-delay: .4s; background: #58c48f; }
+  .vd-dot:nth-child(3n) { animation-delay: .8s; }
+  @keyframes vd-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+</style>
+
+<h2>Which direction should the portfolio take?</h2>
+<p class="subtitle">You said "interactive" — these differ in <em>how</em> the interactivity shows up. All four get smooth Lenis scrolling + GSAP motion; the question is the core identity of the site. Click one (or tell me a blend in the terminal).</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Kinetic minimal — "the Linear look"</h3>
+      <div class="vd-mock vd-dark">
+        <div class="vd-muted">satvik.dev</div>
+        <div class="big">I build <span class="accent">distributed systems</span><br>that don't fall over.</div>
+        <div style="margin-top:10px">
+          <span class="vd-pill">500M events/mo</span><span class="vd-pill">p99 585ms</span><span class="vd-pill">6 regions</span>
+        </div>
+      </div>
+      <p>Dark, typography-led, impact numbers up front. Interactivity = magnetic buttons, text reveals on scroll, hover physics, subtle cursor effects. Safest "senior engineer" signal for recruiters; least gimmick risk. Motion is felt everywhere but never the subject.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Interactive terminal / command-driven</h3>
+      <div class="vd-mock vd-term">
+        <span class="dim"># satvik@portfolio</span><br>
+        <span class="prompt">❯</span> whoami<br>
+        Backend engineer · Go · distributed systems<br>
+        <span class="prompt">❯</span> ls projects/<br>
+        risk-engine/&nbsp;&nbsp;data-exchange/&nbsp;&nbsp;investiq/<br>
+        <span class="prompt">❯</span> <span class="vd-cursor"></span>
+      </div>
+      <p>Hero is a real, typeable terminal (<code>help</code>, <code>work</code>, <code>resume</code>), plus a ⌘K command palette for navigation. Deeply "backend engineer" identity; genuinely interactive, memorable. Risk: recruiters in a hurry may not type — needs a normal scroll path below as fallback.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Scrollytelling systems — animated architecture</h3>
+      <div class="vd-mock vd-diagram">
+        <span class="vd-node">Kafka 500M/mo</span><span class="vd-flow">●●●▶</span><span class="vd-node">scoring engine</span><span class="vd-flow">●●●▶</span><span class="vd-node">6 regions</span>
+        <div class="vd-scrollhint">↓ diagram animates as you scroll the case study</div>
+      </div>
+      <p>Case studies are the star: as you scroll, live architecture diagrams pin and animate — events flowing through your pipeline, latency dropping when the story hits your reliability push. Interactivity = the scroll itself drives the visuals. Strongest proof-of-work for a backend role; most build effort per case study.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="d" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>WebGL playground — 3D scene</h3>
+      <div class="vd-mock vd-canvas">
+        <div>
+          <span class="vd-dot"></span><span class="vd-dot"></span><span class="vd-dot"></span><span class="vd-dot"></span><span class="vd-dot"></span><span class="vd-dot"></span><span class="vd-dot"></span>
+        </div>
+        <div style="font-size:12px;margin-top:8px">particles react to your cursor</div>
+      </div>
+      <p>Three.js hero scene — a particle field / node graph that reacts to the cursor, sections emerging from the 3D world. Maximum wow. Risks: heaviest to build and tune, perf on laptops, and for a <em>backend</em> job search it can read style-over-substance unless executed perfectly.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p class="subtitle"><strong>My recommendation:</strong> A as the base + C's animated-diagram case studies, with B's ⌘K palette as a power-user touch. That combination is distinctive, deeply interactive, and every bit of motion argues you're a good engineer rather than decorating. But pick what excites you — you'll be the one sharing this link.</p>
+</div>

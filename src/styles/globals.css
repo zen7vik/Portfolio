@@ -1,0 +1,195 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: #0a0a0f;
+  --color-fg: #f2efe9;
+  --color-muted: #a6a096;
+  --color-indigo: #7c8cff;
+  --color-green: #58c48f;
+  --color-amber: #f0b35e;
+  --color-rose: #f27a8a;
+  --color-cyan: #5ac8dd;
+  --font-display: var(--font-display-face);
+  --font-body: var(--font-body-face);
+  --font-mono: var(--font-mono-face);
+}
+
+html {
+  background: #0a0a0f;
+  color: #f2efe9;
+}
+
+body {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #7c8cff;
+  color: #0a0a0f;
+}
+
+/* lifts text off the particle field without a heavy backdrop */
+.text-scrim {
+  text-shadow:
+    0 1px 12px rgba(10, 10, 15, 0.95),
+    0 0 32px rgba(10, 10, 15, 0.8);
+}
+
+/* styles for Medium post HTML rendered on-site */
+.blog-prose {
+  color: #c9c5bc;
+  font-size: 1.075rem;
+  line-height: 1.8;
+}
+
+.blog-prose h3,
+.blog-prose h4 {
+  font-family: var(--font-display);
+  color: #f2efe9;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 2.2rem 0 0.8rem;
+  font-size: 1.45rem;
+}
+
+.blog-prose h4 {
+  font-size: 1.15rem;
+}
+
+.blog-prose p {
+  margin: 1.1rem 0;
+}
+
+.blog-prose a {
+  color: #5ac8dd;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.blog-prose img,
+.blog-prose figure {
+  max-width: 100%;
+  border-radius: 10px;
+  margin: 1.6rem auto;
+}
+
+.blog-prose figcaption {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #a6a096;
+}
+
+.blog-prose pre {
+  background: #10131d;
+  border: 1px solid rgba(242, 239, 233, 0.1);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin: 1.4rem 0;
+}
+
+.blog-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: rgba(242, 239, 233, 0.08);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+.blog-prose pre code {
+  background: none;
+  padding: 0;
+}
+
+.blog-prose blockquote {
+  border-left: 3px solid #5ac8dd;
+  padding-left: 1.25rem;
+  color: #a6a096;
+  font-style: italic;
+  margin: 1.6rem 0;
+}
+
+.blog-prose ul,
+.blog-prose ol {
+  padding-left: 1.5rem;
+  margin: 1.1rem 0;
+}
+
+.blog-prose li {
+  margin: 0.4rem 0;
+  list-style: disc;
+}
+
+.blog-prose hr {
+  border: none;
+  border-top: 1px solid rgba(242, 239, 233, 0.12);
+  margin: 2.4rem 0;
+}
+
+/* animated flow along active diagram edges */
+@keyframes diagram-flow {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+
+/* scene fades in over the static gradient once WebGL is live */
+.scene-fade-in {
+  animation: scene-fade 1.2s ease-out both;
+}
+
+@keyframes scene-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* hero title is carried by the particles; shown as text when the scene is off */
+.hero-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+html.no-scene .hero-title {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 12vw, 9rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-title {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 12vw, 9rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+}

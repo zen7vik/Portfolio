@@ -1,0 +1,44 @@
+---
+title: The evidence pipeline behind the AI features
+hook: From raw vendor documents to auto-answered security questionnaires
+role: Owner, evidence and document-analysis service
+period: 2025 to present
+accent: amber
+order: 3
+stats:
+  - value: 'Hybrid'
+    label: 'vector + keyword retrieval'
+  - value: '4'
+    label: 'async stages, status-driven'
+  - value: 'Multi-LLM'
+    label: 'GPT-4o/4.1 + Claude via one gateway'
+summary: I built and own the service that turns uploaded security evidence into a RAG index, powering LLM summarization, evidence classification, and auto-answering of vendor security questionnaires.
+---
+
+## The problem
+
+Third-party risk runs on documents: SOC 2 reports, policies, filled questionnaires. Analysts were reading hundreds of pages to answer the same questions over and over. We wanted the platform to answer questionnaires from a vendor's own uploaded evidence, which means the unglamorous part had to exist first: a pipeline that safely ingests arbitrary customer files and turns them into something retrievable.
+
+## The system
+
+The service owns two domains: threaded comments on any platform entity, and the full evidence lifecycle.
+
+<Scrolly case="rag-pipeline" />
+
+- **Ingestion.** Clients upload directly to S3 via signed URLs, then confirm completion. A malware scan runs asynchronously; document status is the single source of truth across every async step, and a consumer-vs-API race on record creation is settled by document-UUID idempotency.
+- **Vectorization.** Clean documents are chunked and embedded by an async consumer into AWS OpenSearch Serverless, indexed for hybrid retrieval: vector similarity plus keyword match, because compliance language is exactly where pure semantic search gets vague.
+- **Answering.** Questionnaire auto-answer retrieves the relevant chunks and drafts answers through our internal multi-provider LLM gateway (GPT-4o/4.1, Claude on Bedrock), so model choice is a config concern, not an architecture change. The same index powers evidence summarization and classification, and an AI review pass over vendor-submitted questionnaire answers.
+
+## Key decisions
+
+- **Status over orchestration.** Four async stages coordinate through explicit document status rather than a saga framework: simple, debuggable, and each consumer retries independently with backoff.
+- **Hybrid retrieval from day one.** Vector-only search demoed well and failed on precise compliance phrasing; keyword+vector was measurably better on real questionnaires.
+- **Gateway, not vendor lock.** Routing every LLM call through one internal gateway made provider swaps and guardrails a platform property.
+
+## Outcomes
+
+The pipeline powers evidence summarization, classification, and questionnaire auto-answering in production, with malware scanning in front of every byte. Analysts review drafted answers instead of writing them from scratch.
+
+## What I'd do differently
+
+Unify the dual-database support (MySQL and Postgres) that history left behind; the dialect abstraction invites subtle portability bugs. And I would add retrieval quality metrics earlier: you cannot tune what you do not measure.

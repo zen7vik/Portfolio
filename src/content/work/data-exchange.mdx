@@ -1,0 +1,48 @@
+---
+title: Cross-tenant data exchange, from scratch
+hook: Moving sensitive risk data between AWS accounts with zero error-budget breaches
+role: Founding engineer, cross-tenant exchange service
+period: 2025 to present
+accent: rose
+order: 4
+stats:
+  - value: '0'
+    label: 'error-budget breaches in 90 days'
+  - value: '4'
+    label: 'production regions at launch'
+  - value: '1'
+    label: 'DynamoDB table, by design'
+summary: >-
+  I designed and built the service that lets one customer securely consume
+  another's risk posture across AWS account boundaries: STS cross-account
+  access, event-driven sync, single-table NoSQL.
+---
+
+## The problem
+
+A customer wants to see its vendor's live risk posture. Both are tenants, but in different AWS accounts and regions, and the data is sensitive: risk scores, control assessments, findings. There was no path for this. I got the greenfield brief: build the service that moves this data safely, with consent, auditability, and without a human in the loop.
+
+## The system
+
+The service is Go, one binary with role flags (API, operations consumer, delay-retry consumer) so prod scales each role independently while local dev runs everything.
+
+<Scrolly case="data-exchange" />
+
+- **Consent model.** A contract records the relationship: who shares what with whom, with status lifecycle and bindings describing the shared slices. Creation is an idempotent conditional put.
+- **Sync pipeline.** Three event types drive a run: generate (concurrently fetch risk, controls, and findings from upstream services, strip PII, upload versioned JSON artifacts), sync (copy files cross-account), ingest (create external findings in the consuming tenant). Retriable failures route through a delayed-message exchange with exponential backoff and jitter; poison messages land in a DLQ.
+- **Cross-account security.** The copy step assumes a role in the source account via STS with a deterministic External ID derived from account and region, closing the confused-deputy hole: a leaked role ARN alone is useless.
+- **Single-table DynamoDB.** Contracts and sync history share one table with composite keys. The secondary-index key attributes are written but the index is deliberately not provisioned; at current cardinality the rare reverse-direction lookup is a filtered scan, and promoting the attributes to a real GSI later is a zero-migration change.
+
+## Key decisions
+
+- **Cost-shaped schema.** Paying for a GSI to speed up a rare query path is backwards; denormalize the keys now, provision the index when cardinality demands it.
+- **Explicit retry topology.** At-least-once with a delay-retry exchange and DLQ beats broker auto-requeue: you can see, cap, and reason about every retry.
+- **Overlap prevention as data.** An active-sync marker on the contract makes concurrent runs impossible by construction, and only success advances the last-synced pointer.
+
+## Outcomes
+
+Shipped from empty repo to production across regions, owning architecture, eventing, deployment, and CI/CD. Ninety days in: zero error-budget breaches, and enterprise deals that required vendor-posture sharing unblocked.
+
+## What I'd do differently
+
+Provision the GSI up front; the scan trade-off was right on cost but wrong on operational surprise. And replace at-least-once ingest with a transactional outbox for true exactly-once semantics on the consuming side.
