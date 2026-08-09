@@ -20,7 +20,7 @@ const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500', '600'], 
 export const metadata: Metadata = {
   title: site.title,
   description: site.description,
-  metadataBase: new URL('https://satvik.vercel.app'),
+  metadataBase: new URL(site.url),
   openGraph: {
     title: site.title,
     description: site.description,

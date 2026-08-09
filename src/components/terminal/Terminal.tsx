@@ -118,7 +118,7 @@ export default function Terminal({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
-              className="flex-1 bg-transparent font-mono text-sm text-fg caret-[#c9f7d4] outline-none"
+              className="flex-1 bg-transparent font-mono text-base text-fg md:text-sm caret-[#c9f7d4] outline-none"
               spellCheck={false}
               autoComplete="off"
               aria-label="Terminal input"

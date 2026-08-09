@@ -1,6 +1,7 @@
 export const site = {
   name: 'Satvik Singh',
-  title: 'Satvik Singh, Backend Engineer',
+  title: 'Satvik Singh, Fullstack AI Engineer',
+  url: 'https://zen7vik.vercel.app',
   tagline: "Fullstack AI engineer. I build distributed systems that don't fall over.",
   description:
     'Distributed systems, AI pipelines, and the platforms behind them: risk scoring at 500M events/month, workflow automation at 147K runs/month.',

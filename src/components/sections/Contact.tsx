@@ -34,8 +34,11 @@ export default function Contact() {
       </Reveal>
       <footer className="mt-24 border-t border-fg/10 pt-6">
         <p className="font-mono text-xs text-muted/70">
-          Built with Next.js, Three.js, GSAP. Press <kbd className="rounded border border-fg/20 px-1.5 py-0.5">~</kbd> for
-          the terminal.
+          Built with Next.js, Three.js, GSAP.
+          <span className="hidden md:inline">
+            {' '}
+            Press <kbd className="rounded border border-fg/20 px-1.5 py-0.5">~</kbd> for the terminal.
+          </span>
         </p>
       </footer>
     </section>

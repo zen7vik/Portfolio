@@ -15,9 +15,9 @@ export default function TopNav() {
         <a href="#hero" className="font-mono text-sm lowercase tracking-wide text-muted transition-colors hover:text-fg">
           satvik
         </a>
-        <div className="hidden items-center gap-7 font-mono text-xs uppercase tracking-widest text-muted md:flex">
+        <div className="flex items-center gap-7 font-mono text-xs uppercase tracking-widest text-muted">
           {links.map((l) => (
-            <a key={l.href} href={l.href} className="transition-colors hover:text-fg">
+            <a key={l.href} href={l.href} className="hidden transition-colors hover:text-fg md:inline">
               {l.label}
             </a>
           ))}

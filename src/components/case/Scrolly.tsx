@@ -48,8 +48,8 @@ export default function Scrolly({ case: slug, accent = '#7c8cff' }: { case: stri
           <SystemDiagram diagram={diagram} active={active} accent={accent} />
         </div>
       </div>
-      <div className="order-1 lg:hidden">
-        <div className="rounded-2xl border border-fg/10 bg-bg/70 p-4">
+      <div className="sticky top-16 z-10 order-1 lg:hidden">
+        <div className="rounded-2xl border border-fg/10 bg-bg/90 p-3 backdrop-blur-md">
           <SystemDiagram diagram={diagram} active={active} accent={accent} />
         </div>
       </div>

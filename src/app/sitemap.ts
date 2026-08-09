@@ -1,7 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { getAllCases } from '@/lib/content'
+import { site } from '@/lib/site'
 
-const BASE = 'https://satvik.vercel.app'
+const BASE = site.url
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

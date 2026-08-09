@@ -105,7 +105,7 @@ export default function CommandPalette({
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={onKeyDown}
           placeholder="Type to search…"
-          className="w-full border-b border-fg/10 bg-transparent px-5 py-4 font-mono text-sm text-fg outline-none placeholder:text-muted/60"
+          className="w-full border-b border-fg/10 bg-transparent px-5 py-4 font-mono text-base md:text-sm text-fg outline-none placeholder:text-muted/60"
           spellCheck={false}
           aria-label="Palette search"
         />

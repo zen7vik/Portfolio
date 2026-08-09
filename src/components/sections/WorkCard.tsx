@@ -30,7 +30,12 @@ export default function WorkCard({ meta, index }: { meta: CaseMeta; index: numbe
           </h3>
           <p className="mt-3 max-w-xl text-muted">{meta.hook}</p>
           <p className="mt-4 font-mono text-xs text-muted/80">
-            {meta.stats.map((s) => `${s.value} ${s.label}`).join('  ·  ')}
+            {meta.stats.map((s, i) => (
+              <span key={s.label} className={i >= 2 ? 'hidden sm:inline' : undefined}>
+                {s.value} {s.label}
+                {i < meta.stats.length - 1 && <span className={`mx-2 text-muted/50 ${i >= 1 ? 'hidden sm:inline' : ''}`}>·</span>}
+              </span>
+            ))}
           </p>
         </div>
         <span className="hidden font-display text-2xl italic text-muted/50 transition-all duration-300 group-hover:translate-x-2 group-hover:text-fg md:block">
