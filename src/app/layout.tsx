@@ -3,6 +3,7 @@ import { Fraunces, IBM_Plex_Mono, Instrument_Sans } from 'next/font/google'
 import SceneCanvas from '@/components/scene/SceneCanvas'
 import SmoothScroll from '@/components/providers/SmoothScroll'
 import HotkeyMount from '@/components/terminal/HotkeyMount'
+import CustomCursor from '@/components/ui/CustomCursor'
 import Grain from '@/components/ui/Grain'
 import { getAllCases } from '@/lib/content'
 import { site } from '@/lib/site'
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
           </div>
         </SmoothScroll>
         <Grain />
+        <CustomCursor />
         <HotkeyMount cases={cases} />
       </body>
     </html>

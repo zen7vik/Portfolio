@@ -1,3 +1,4 @@
+import FooterStatus from '@/components/ui/FooterStatus'
 import GlowRow from '@/components/ui/GlowRow'
 import Reveal from '@/components/ui/Reveal'
 import { site } from '@/lib/site'
@@ -32,7 +33,7 @@ export default function Contact() {
           </a>
         </div>
       </Reveal>
-      <footer className="mt-24 border-t border-fg/10 pt-6">
+      <footer className="mt-24 flex flex-col gap-3 border-t border-fg/10 pt-6 md:flex-row md:items-center md:justify-between">
         <p className="font-mono text-xs text-muted/70">
           Built with Next.js, Three.js, GSAP.
           <span className="hidden md:inline">
@@ -40,6 +41,7 @@ export default function Contact() {
             Press <kbd className="rounded border border-fg/20 px-1.5 py-0.5">~</kbd> for the terminal.
           </span>
         </p>
+        <FooterStatus />
       </footer>
     </section>
   )

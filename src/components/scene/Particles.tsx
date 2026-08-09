@@ -29,6 +29,9 @@ const vertexShader = /* glsl */ `
     p = p * p * (3.0 - 2.0 * p); // smoothstep ease per particle
     vec3 pos = mix(aFrom, aTarget, p);
 
+    // slow breathing: the whole field inhales and exhales almost imperceptibly
+    pos *= 1.0 + sin(uTime * 0.55) * 0.012;
+
     // ambient drift, cheap trig noise
     float t = uTime * 0.35;
     pos.x += sin(t + pos.y * 1.7 + aRand * 6.28) * 0.05 * uIntensity;

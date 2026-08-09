@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import CaseSceneSetter from '@/components/case/CaseSceneSetter'
+import ReadingProgress from '@/components/ui/ReadingProgress'
 import { getPosts } from '@/lib/medium'
 
 export const revalidate = 86400
@@ -31,12 +32,13 @@ export default async function WritingPage({ params }: PageProps<'/writing/[id]'>
     <main className="text-scrim">
       <CaseSceneSetter accent="#5ac8dd" formation="ambient" intensity={0.3} />
       <nav className="sticky top-0 z-20 border-b border-fg/10 bg-bg/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
+        <div className="relative mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
           <Link href="/#writing" className="font-mono text-sm text-muted transition-colors hover:text-fg">
             ← satvik
           </Link>
           <span className="font-mono text-xs text-muted/70">writing</span>
         </div>
+        <ReadingProgress accent="#5ac8dd" />
       </nav>
       <article className="mx-auto max-w-3xl px-6 pb-24 pt-20">
         <p className="font-mono text-xs uppercase tracking-[0.25em] text-cyan">
