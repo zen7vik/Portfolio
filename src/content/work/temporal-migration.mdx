@@ -1,0 +1,55 @@
+---
+title: Moving a live workflow cluster with zero downtime
+hook: An approved plan needed a 1.5-hour write freeze. I replaced it with a drain-and-flip that cut over in one second.
+role: Owner of the cutover design and rollout
+period: August 2026
+accent: amber
+order: 3
+stats:
+  - value: '1s'
+    label: 'cutover, down from a 1.5h freeze'
+  - value: '0'
+    label: 'runs lost or duplicated'
+  - value: '4'
+    label: 'environments migrated'
+summary: Our workflow platform's Temporal cluster had to move to new infrastructure. The approved plan froze writes for 1.5 hours. I designed and ran a drain-and-flip that needed no freeze, no snapshot restore, and no pause.
+---
+
+## The problem
+
+The workflow platform runs on Temporal, and Temporal's cluster was being rehomed onto new Kubernetes and Aurora infrastructure. The plan on the table was a snapshot and restore: freeze every write for about an hour and a half, copy the database, point everything at the new cluster. For a product whose customers have scheduled workflows firing around the clock, that window was a real cost, and leadership had already ruled out downtime and read-only mode.
+
+## The system
+
+Before designing anything I read the code to find out what the platform actually depends on, because the right cutover depends on facts, not on the generic Temporal playbook.
+
+<Scrolly case="temporal-migration" />
+
+What the code showed made a simpler plan possible:
+
+- **Nothing reaches back into a running workflow.** There are no cancel, signal, or terminate paths. A starter only launches a run and waits on the result, so the API never needs to talk to two clusters at once.
+- **Workers are pure configuration.** Host, namespace, and task queue all come from the environment. Running a second worker set against the old cluster is a deployment change with zero code.
+- **History does not live in Temporal.** Run history and step outputs live in the platform's own database, so the UI never reads Temporal and a fresh cluster loses nothing customers can see.
+- **Everything is bounded.** Retries have a maximum attempt count, timeouts are finite, and sleeps are short poll intervals. A drain is guaranteed to finish.
+
+## The runbook
+
+1. Start a worker set on the new cluster, next to the old one.
+2. Migrate every schedule: pause it on the old cluster, then create it on the new one with the same ID. If a tick is ever at risk, the order guarantees a missed tick rather than a double fire.
+3. Flip the starters to the new cluster with a single configuration deploy.
+4. Let the old cluster drain to zero open executions, with retries still on.
+5. Scale down the old workers and keep the old cluster read-only for a week before decommissioning.
+
+## Key decisions
+
+- **Prove it before proposing it.** A local proof of concept ran both clusters side by side: the flip took one second, 11 of 11 in-flight runs completed, a migrated schedule fired exactly once on the new cluster at its cron time, and rollback worked in both directions.
+- **Count executions, not queue depth.** An empty task queue can still hide a workflow sleeping between retries. The drain gate is zero open executions.
+- **Missed tick over double fire.** A duplicate workflow can send duplicate emails to a customer's vendors. A late one cannot hurt anyone.
+
+## Outcomes
+
+The cutover ran across four environments, two of them production regions, with no write freeze and no lost or duplicated runs. Along the way the migration surfaced a real scheduling bug: wildcard cron fields were being converted so that an every-minute schedule became daily at midnight.
+
+## What I'd do differently
+
+Build the schedule migration as a reusable tool with a dry-run diff from day one. Infrastructure moves like this come back, and the next one should be a command, not a project.

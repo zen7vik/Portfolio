@@ -60,7 +60,7 @@ const workflowPlatform: CaseDiagram = {
     {
       id: 'insights',
       title: 'Watching itself run',
-      body: 'An event-driven insights pipeline emits per-run metrics behind a feature flag: which workflows run, where they fail, how long nodes take. 147K runs a month, visible.',
+      body: 'An event-driven insights pipeline emits per-run metrics behind a feature flag: which workflows run, where they fail, how long nodes take, and the hours each workflow saves.',
       highlight: ['engine', 'insights', 'engine-insights'],
     },
   ],
@@ -75,8 +75,8 @@ const riskEngine: CaseDiagram = {
     { id: 'simapi', x: 420, y: 130, w: 130, label: 'Simulation API', sub: 'FAIR / Monte Carlo' },
     { id: 'cache', x: 20, y: 130, w: 140, label: 'Redis cache', sub: 'input-hash keyed, 24h' },
     { id: 'entity', x: 220, y: 230, w: 140, label: 'Entity roll-up', sub: 'scenario → org score' },
-    { id: 'kill', x: 20, y: 330, w: 140, label: 'Kill switch', sub: 'drain, never pile up' },
-    { id: 'heal', x: 220, y: 330, w: 140, label: 'Self-healing job', sub: 'every 10 minutes' },
+    { id: 'db', x: 20, y: 330, w: 140, label: 'Postgres', sub: 'indexed hot paths' },
+    { id: 'pool', x: 420, y: 330, w: 130, label: 'HTTP pool', sub: 'keep-alive, bounded' },
   ],
   edges: [
     { from: 'upstream', to: 'reactor' },
@@ -85,13 +85,13 @@ const riskEngine: CaseDiagram = {
     { from: 'consumer', to: 'simapi' },
     { from: 'consumer', to: 'cache' },
     { from: 'consumer', to: 'entity' },
-    { from: 'kill', to: 'consumer' },
-    { from: 'heal', to: 'entity' },
+    { from: 'entity', to: 'db' },
+    { from: 'entity', to: 'pool' },
   ],
   steps: [
     {
       id: 'flow',
-      title: '500M events, one pipeline',
+      title: '72M calculations, one pipeline',
       body: 'Every control change, assessment, and threat-intel update flows through the reactor, which decides what actually needs rescoring. Nothing recomputes wholesale.',
       highlight: ['upstream', 'reactor', 'upstream-reactor'],
     },
@@ -108,16 +108,16 @@ const riskEngine: CaseDiagram = {
       highlight: ['consumer', 'simapi', 'entity', 'buffer-consumer', 'consumer-simapi', 'consumer-entity'],
     },
     {
-      id: 'incidents',
-      title: 'The reliability war',
-      body: 'Ten memory incidents, fourteen CPU incidents, three weeks. Memory retention fixed by loading 9 columns instead of 40-column ORM instances; guarded mutex-cache eviction; database indexing on the hot paths; an O(n squared) loop made linear.',
-      highlight: ['consumer', 'entity'],
+      id: 'memory',
+      title: 'Stop the slow crash',
+      body: 'A consumer died after about ten hours. It loaded 42-column rows to write a 3-field audit log, kept a mutex cache that never evicted, and built an array in O(n squared). Fixing all three ended the out-of-memory kills.',
+      highlight: ['consumer', 'entity', 'consumer-entity'],
     },
     {
-      id: 'operate',
-      title: 'Designed degradation',
-      body: 'A kill switch at the top of the scoring path drains messages when the downstream API degrades, while forced rescores still pass. A self-healing job regenerates stale risk data every 10 minutes. Outages became non-events.',
-      highlight: ['kill', 'heal', 'kill-consumer', 'heal-entity'],
+      id: 'latency',
+      title: 'Half the p95',
+      body: 'Indexes on the hot lookup paths, keep-alive connections with bounded timeouts, and one home for every cache TTL. p95 went from 604 ms to 281 ms and the error rate fell 58%.',
+      highlight: ['entity', 'db', 'pool', 'entity-db', 'entity-pool'],
     },
   ],
 }
@@ -223,9 +223,64 @@ const dataExchange: CaseDiagram = {
   ],
 }
 
+const temporalMigration: CaseDiagram = {
+  nodes: [
+    { id: 'starters', x: 20, y: 30, w: 140, label: 'Starters', sub: 'API + event consumer' },
+    { id: 'old', x: 220, y: 30, w: 140, label: 'Old cluster', sub: 'drains to zero' },
+    { id: 'oldw', x: 420, y: 30, w: 130, label: 'Old workers', sub: 'finish in-flight runs' },
+    { id: 'sched', x: 20, y: 150, w: 140, label: 'Schedules', sub: 'same IDs both sides' },
+    { id: 'new', x: 220, y: 230, w: 140, label: 'New cluster', sub: 'Kubernetes + Aurora' },
+    { id: 'neww', x: 420, y: 230, w: 130, label: 'New workers', sub: 'env config only' },
+    { id: 'flowdb', x: 220, y: 330, w: 140, label: 'Platform DB', sub: 'run history lives here' },
+  ],
+  edges: [
+    { from: 'starters', to: 'old' },
+    { from: 'old', to: 'oldw' },
+    { from: 'sched', to: 'old' },
+    { from: 'sched', to: 'new' },
+    { from: 'starters', to: 'new' },
+    { from: 'new', to: 'neww' },
+    { from: 'oldw', to: 'flowdb' },
+    { from: 'neww', to: 'flowdb' },
+  ],
+  steps: [
+    {
+      id: 'read',
+      title: 'Read the code first',
+      body: 'No cancel or signal paths, workers configured purely by environment, run history kept in the platform database. Those three facts made a freeze unnecessary.',
+      highlight: ['starters', 'old', 'oldw', 'flowdb', 'starters-old', 'old-oldw', 'oldw-flowdb'],
+    },
+    {
+      id: 'stand',
+      title: 'Stand up the new side',
+      body: 'A second worker set connects to the new cluster. It is a deployment change, not a code change, and the old side keeps serving every run.',
+      highlight: ['new', 'neww', 'new-neww'],
+    },
+    {
+      id: 'schedules',
+      title: 'Move schedules safely',
+      body: 'Each schedule is paused on the old cluster, then created on the new one with the same ID. The order means a missed tick is possible but a double fire is not.',
+      highlight: ['sched', 'old', 'new', 'sched-old', 'sched-new'],
+    },
+    {
+      id: 'flip',
+      title: 'Flip in one second',
+      body: 'One configuration deploy points the starters at the new cluster. New runs start there immediately; nothing in flight is touched.',
+      highlight: ['starters', 'new', 'starters-new'],
+    },
+    {
+      id: 'drain',
+      title: 'Drain, then decommission',
+      body: 'The old workers finish every open execution with retries still on. The gate is zero open executions, not an empty queue. Both sides write history to the same database, so customers see one continuous record.',
+      highlight: ['old', 'oldw', 'neww', 'flowdb', 'old-oldw', 'oldw-flowdb', 'neww-flowdb'],
+    },
+  ],
+}
+
 const registry: Record<string, CaseDiagram> = {
   'workflow-platform': workflowPlatform,
   'risk-engine': riskEngine,
+  'temporal-migration': temporalMigration,
   'rag-pipeline': ragPipeline,
   'data-exchange': dataExchange,
 }

@@ -1,18 +1,18 @@
 ---
 title: An extensible workflow automation platform
-hook: Turning a fixed workflow tool into a platform any API can plug into
+hook: Turning a fixed workflow tool into a platform any API can plug into, and cutting its failure rate by two thirds
 role: Owner, workflow automation platform
 period: 2025 to present
 accent: indigo
 order: 1
 stats:
-  - value: '147K'
-    label: 'workflows/month in production'
-  - value: '29'
-    label: 'stories shipped in one epic'
+  - value: '3.8%'
+    label: 'failure rate, down from 12.3%'
+  - value: '2x'
+    label: 'run volume over the same window'
   - value: '0'
     label: 'plaintext secrets, anywhere'
-summary: I own a Temporal-based workflow engine running 147K automated workflows a month, and I built the generic HTTP integration node that turned it from a fixed tool into an extensible integration platform.
+summary: I own a Temporal-based workflow platform that runs customers' third-party-risk playbooks, cut its failure rate from 12.3% to 3.8% while volume doubled, and built the HTTP integration node that turned it into an extensible platform.
 ---
 
 ## The problem
@@ -45,7 +45,9 @@ Around the node, the platform grew up: node UI is now declared by the backend (l
 
 ## Outcomes
 
-The platform runs about 147K workflows a month. The HTTP node shipped as a 29-story epic covering the vault, egress hardening, classification, test tooling, and UI, with security review of the dialer and credential path. Teams now wire new integrations as workflow configuration instead of feature requests.
+The HTTP node was released in July 2026 as a 30-story epic across 6 services, covering the vault, egress hardening, classification, test tooling, and UI. A senior exec summed up the launch: "This is not just a feature, it opens up adding integrations as a configuration." The execution insights layer followed in August 2026.
+
+Over the same summer the platform's production failure rate fell from 12.3% to 3.8% while monthly run volume roughly doubled.
 
 ## What I'd do differently
 

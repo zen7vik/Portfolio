@@ -8,17 +8,10 @@ function center(n: { x: number; y: number; w: number }) {
   return { cx: n.x + n.w / 2, cy: n.y + NODE_H / 2 }
 }
 
-export default function SystemDiagram({
-  diagram,
-  active,
-  accent,
-}: {
-  diagram: CaseDiagram
-  active: string[]
-  accent: string
-}) {
+export default function SystemDiagram({ diagram, active }: { diagram: CaseDiagram; active: string[] }) {
   const byId = new Map(diagram.nodes.map((n) => [n.id, n]))
   const isActive = (id: string) => active.includes(id)
+  const ease = 'stroke 0.5s, fill 0.5s, opacity 0.5s'
 
   return (
     <svg viewBox="0 0 570 400" className="h-auto w-full" role="img" aria-label="System architecture diagram">
@@ -31,48 +24,46 @@ export default function SystemDiagram({
         const cb = center(b)
         const on = isActive(id)
         return (
-          <g key={id}>
-            <line
-              x1={ca.cx}
-              y1={ca.cy}
-              x2={cb.cx}
-              y2={cb.cy}
-              stroke={on ? accent : '#3a4258'}
-              strokeWidth={on ? 2 : 1}
-              strokeDasharray={on ? '6 6' : 'none'}
-              opacity={on ? 1 : 0.6}
-              style={
-                on
-                  ? { animation: 'diagram-flow 0.9s linear infinite', transition: 'stroke 0.4s' }
-                  : { transition: 'stroke 0.4s' }
-              }
-            />
-          </g>
+          <line
+            key={id}
+            x1={ca.cx}
+            y1={ca.cy}
+            x2={cb.cx}
+            y2={cb.cy}
+            strokeWidth={on ? 2 : 1}
+            strokeDasharray={on ? '6 6' : undefined}
+            style={{
+              stroke: on ? 'var(--accent)' : 'var(--line)',
+              transition: ease,
+              animation: on ? 'diagram-flow 0.9s linear infinite' : undefined,
+            }}
+          />
         )
       })}
       {diagram.nodes.map((n) => {
         const on = isActive(n.id)
         return (
-          <g key={n.id} style={{ transition: 'opacity 0.4s' }} opacity={on ? 1 : 0.55}>
+          <g key={n.id}>
             <rect
               x={n.x}
               y={n.y}
               width={n.w}
               height={NODE_H}
               rx={10}
-              fill={on ? '#161a28' : '#10131d'}
-              stroke={on ? accent : '#3a4258'}
-              strokeWidth={on ? 1.75 : 1}
-              style={{ transition: 'stroke 0.4s, fill 0.4s', filter: on ? `drop-shadow(0 0 8px ${accent}66)` : 'none' }}
+              strokeWidth={on ? 1.5 : 1}
+              style={{ fill: 'var(--bg)', stroke: on ? 'var(--accent)' : 'var(--line)', transition: ease }}
             />
             <text
               x={n.x + n.w / 2}
               y={n.y + 24}
               textAnchor="middle"
-              fill={on ? '#e8e8ea' : '#9aa3b8'}
               fontSize={13}
               fontWeight={600}
-              fontFamily="var(--font-jetbrains), monospace"
+              style={{
+                fill: on || !active.length ? 'var(--fg)' : 'var(--muted)',
+                fontFamily: 'var(--font-sans)',
+                transition: ease,
+              }}
             >
               {n.label}
             </text>
@@ -81,9 +72,8 @@ export default function SystemDiagram({
                 x={n.x + n.w / 2}
                 y={n.y + 42}
                 textAnchor="middle"
-                fill="#6b7280"
-                fontSize={10}
-                fontFamily="var(--font-jetbrains), monospace"
+                fontSize={10.5}
+                style={{ fill: 'var(--muted)', fontFamily: 'var(--font-mono)', opacity: on || !active.length ? 1 : 0.6 }}
               >
                 {n.sub}
               </text>

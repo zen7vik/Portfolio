@@ -1,15 +1,15 @@
 ---
 title: Cross-tenant data exchange, from scratch
-hook: Moving sensitive risk data between AWS accounts with zero error-budget breaches
+hook: Moving sensitive risk data between AWS accounts, 19.7K syncs a month with zero errors
 role: Founding engineer, cross-tenant exchange service
 period: 2025 to present
 accent: rose
-order: 4
+order: 5
 stats:
+  - value: '19.7K'
+    label: 'syncs a month'
   - value: '0'
-    label: 'error-budget breaches in 90 days'
-  - value: '4'
-    label: 'production regions at launch'
+    label: 'errors in 30 days'
   - value: '1'
     label: 'DynamoDB table, by design'
 summary: >-
@@ -41,7 +41,7 @@ The service is Go, one binary with role flags (API, operations consumer, delay-r
 
 ## Outcomes
 
-Shipped from empty repo to production across regions, owning architecture, eventing, deployment, and CI/CD. Ninety days in: zero error-budget breaches, and enterprise deals that required vendor-posture sharing unblocked.
+Shipped from an empty repo to production across 4 regions as a founding engineer on the service, covering architecture, eventing, deployment, and CI/CD. It now runs about 19,700 syncs a month for 348 tenants, with zero errors across 371K traced operations in the last 30 days.
 
 ## What I'd do differently
 

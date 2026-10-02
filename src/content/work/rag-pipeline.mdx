@@ -4,15 +4,15 @@ hook: From raw vendor documents to auto-answered security questionnaires
 role: Owner, evidence and document-analysis service
 period: 2025 to present
 accent: amber
-order: 3
+order: 4
 stats:
+  - value: '25K'
+    label: 'malware scans a month'
+  - value: '7.6K'
+    label: 'documents embedded a month'
   - value: 'Hybrid'
     label: 'vector + keyword retrieval'
-  - value: '4'
-    label: 'async stages, status-driven'
-  - value: 'Multi-LLM'
-    label: 'GPT-4o/4.1 + Claude via one gateway'
-summary: I built and own the service that turns uploaded security evidence into a RAG index, powering LLM summarization, evidence classification, and auto-answering of vendor security questionnaires.
+summary: I built and own the evidence pipeline that turns uploaded security documents into a RAG index, which powers LLM summarization, classification, and auto-answering of vendor security questionnaires.
 ---
 
 ## The problem
@@ -27,7 +27,8 @@ The service owns two domains: threaded comments on any platform entity, and the 
 
 - **Ingestion.** Clients upload directly to S3 via signed URLs, then confirm completion. A malware scan runs asynchronously; document status is the single source of truth across every async step, and a consumer-vs-API race on record creation is settled by document-UUID idempotency.
 - **Vectorization.** Clean documents are chunked and embedded by an async consumer into AWS OpenSearch Serverless, indexed for hybrid retrieval: vector similarity plus keyword match, because compliance language is exactly where pure semantic search gets vague.
-- **Answering.** Questionnaire auto-answer retrieves the relevant chunks and drafts answers through our internal multi-provider LLM gateway (GPT-4o/4.1, Claude on Bedrock), so model choice is a config concern, not an architecture change. The same index powers evidence summarization and classification, and an AI review pass over vendor-submitted questionnaire answers.
+- **Answering.** A sibling service retrieves the relevant chunks from this index and drafts questionnaire answers through the internal multi-provider LLM gateway (GPT-4o/4.1, Claude on Bedrock), so model choice is a config concern, not an architecture change. The same index powers evidence summarization and classification.
+- **Guardrails and tools.** I also shipped input guardrails for the workflow platform's AI nodes through the same gateway, and an MCP tool that exposes workflow analytics to the company's AI assistant.
 
 ## Key decisions
 
@@ -37,7 +38,7 @@ The service owns two domains: threaded comments on any platform entity, and the 
 
 ## Outcomes
 
-The pipeline powers evidence summarization, classification, and questionnaire auto-answering in production, with malware scanning in front of every byte. Analysts review drafted answers instead of writing them from scratch.
+In production the pipeline processes about 25K malware scans, 10K completed uploads, and 7.6K embedding jobs a month, with an error rate of 0.03%. Analysts review drafted answers instead of writing them from scratch.
 
 ## What I'd do differently
 

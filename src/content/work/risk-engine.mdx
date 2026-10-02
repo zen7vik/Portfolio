@@ -1,48 +1,47 @@
 ---
-title: A risk-scoring engine that stopped falling over
-hook: 500M events a month, 6 regions, and a 3-week war on 24 production incidents
+title: A risk-scoring engine, made fast and boring
+hook: 72M risk calculations a month across 6 regions, and a performance push that halved p95 latency
 role: Owner, risk-scoring engine
 period: 2025 to present
 accent: green
 order: 2
 stats:
-  - value: '500M'
-    label: 'events/month processed'
-  - value: 'p99 585ms'
-    label: '1.16M risk evaluations/month'
-  - value: '24'
-    label: 'incidents resolved in one push'
-summary: I operate the engine that computes every customer's cyber-risk posture across 6 production regions, and I led the reliability push that took it from weekly memory incidents to boring.
+  - value: '72M'
+    label: 'risk calculations a month'
+  - value: '-53%'
+    label: 'p95 latency, 604 to 281 ms'
+  - value: '-58%'
+    label: 'server error rate'
+summary: I own the engine that computes every customer's cyber-risk posture across 6 production regions and 354 tenants, and I drove the performance and reliability program that cut its p95 latency in half.
 ---
 
 ## The problem
 
-The scoring engine is the heart of the platform: every control change, assessment, and threat-intel update flows through it to recompute customer risk. At ~500M events a month it had become the platform's least boring service: 10 critical-memory incidents and 14 CPU incidents in quick succession, OOM-killed consumers during large tenant deletions, and P0 customer APIs breaching their latency targets.
+The scoring engine is the heart of the platform. Every control change, assessment, and threat-intel update flows through it to recompute a customer's risk. It runs about 72 million risk-scenario calculations a month across 6 production regions, and it had become the platform's least boring service: consumers crashing with out-of-memory errors after hours of uptime, slow customer-facing APIs, and incidents that started somewhere else and ended here.
 
 ## The system
 
-Scoring is event-driven: upstream changes land on a reactor that decides what to rescore, a buffer queue dedupes storms, and consumers assemble inputs for the probabilistic engine (an external FAIR/Monte Carlo scoring API), then aggregate scenario scores up to entity level. The engine's job is orchestration done well: caching, batching, persistence, and blast-radius control.
+Scoring is event-driven. Upstream changes land on a reactor that decides what to rescore, a buffer queue collapses storms of related changes, and consumers assemble inputs for an external FAIR and Monte Carlo scoring API, then aggregate scenario scores up to the entity level. The engine's job is orchestration done well: caching, batching, persistence, and keeping the blast radius small.
 
 <Scrolly case="risk-engine" />
 
-The reliability push attacked the incident classes one by one:
+The performance program attacked one cause at a time:
 
-- **Memory retention.** Bulk org deletions loaded full 40-column ORM instances just to delete and audit them. Rewrote the path to fetch only the 9 needed columns as plain rows, stopped returning the array so nothing retained it, and added guarded eviction for a per-entity mutex cache that had grown unbounded. Also collapsed an accidental O(n²) spread-in-loop.
+- **Memory retention.** A consumer was being killed after roughly ten hours. Bulk deletions loaded 42-column ORM rows just to write a three-field audit log, a per-entity mutex cache never evicted, and an accidental O(n²) array build sat in the loop. Fetching only the needed columns, bounding the cache, and fixing the loop stopped the crashes.
 - **Database indexing** on the hot lookup paths that ate CPU during scoring storms.
-- **Cache-TTL redesign.** Centralized every TTL, keyed the scoring cache by input hash with a 24-hour window, and made buffer dedup collapse control-storms before they fanned out into simulations.
-- **Load-shedding kill switch.** An operational flag checked at the top of the scoring path: when the downstream simulation API degrades, consumers drain messages without piling up retries, while admin-forced rescores still pass through.
-- **Self-healing.** A job that finds and regenerates stale risk data every 10 minutes, so recovery from a bad window needs no human.
+- **Connection keep-alive with bounded timeouts**, so slow downstream calls stop holding sockets and threads hostage.
+- **Cache redesign.** Every TTL now lives in one place. The scoring cache is keyed by a hash of the exact inputs for 24 hours, and a short dedup window collapses control storms before they fan out into simulations.
 
 ## Key decisions
 
-- **Dedupe before you scale.** The cheapest simulation is the one you never run; buffer-queue dedup and input-hash caching bought more capacity than any instance resize.
-- **Kill switches are features.** Explicitly designing the degraded mode (drain, do not retry-storm) turned outages into non-events.
-- **Fix the allocation, not the limit.** The OOM fix was measured object-shape work, not a bigger container.
+- **Dedupe before you scale.** The cheapest simulation is the one you never run. Input-hash caching and buffer dedup bought more headroom than any instance resize.
+- **Fix the allocation, not the limit.** The out-of-memory fix was object-shape work measured against the real code path, not a bigger container.
+- **Follow the chain.** One incident looked like a database outage in an unrelated service. Tracing it showed five hops: 18K control writes became 19.2M change events, then 46M analytics logs, then 42K scoring messages, then a shared database running out of memory. Fixing the first hop mattered more than the last.
 
 ## Outcomes
 
-The push resolved all 24 incident threads, and the platform-wide follow-through brought P95 latency of critical P0 customer APIs under 1 second. The engine now serves ~1.16M risk evaluations a month at p99 585ms across 6 regions, and on-call for it is quiet.
+Comparing May to early July against mid August to September 2026: p95 API latency fell from 604 ms to 281 ms (53% lower) and the server error rate fell 58%, while the engine kept serving 354 tenants across 6 regions.
 
 ## What I'd do differently
 
-Consolidate the scoring client so a temporary in-service re-implementation cannot drift from the external API, and add a request-level timeout on every S3 read; one hung read during a what-if simulation once taught us that lesson the hard way.
+Consolidate the scoring client so a temporary in-service re-implementation cannot drift from the external API, and add a request-level timeout on every S3 read. One hung read during a what-if simulation taught that lesson the hard way.

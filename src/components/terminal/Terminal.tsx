@@ -15,7 +15,7 @@ export default function Terminal({
 }) {
   const router = useRouter()
   const [history, setHistory] = useState<HistoryEntry[]>([
-    { lines: ["satvik@portfolio — type 'help'"] },
+    { lines: ["satvik@portfolio: type 'help'"] },
   ])
   const [input, setInput] = useState('')
   const [cmdHistory, setCmdHistory] = useState<string[]>([])
@@ -81,7 +81,8 @@ export default function Terminal({
       aria-label="Terminal"
     >
       <div
-        className="flex h-[70vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-fg/20 bg-[#0b1020] shadow-2xl"
+        data-theme="dark"
+        className="flex h-[70vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-fg/20 bg-[#0c0c0d] shadow-2xl"
         onClick={(e) => {
           e.stopPropagation()
           inputRef.current?.focus()
@@ -91,17 +92,17 @@ export default function Terminal({
           <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
           <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
           <span className="h-3 w-3 rounded-full bg-[#28c840]" />
-          <span className="ml-3 font-mono text-xs text-muted">satvik@portfolio — zsh</span>
+          <span className="ml-3 font-mono text-xs text-muted">satvik@portfolio: zsh</span>
           <button onClick={onClose} className="ml-auto font-mono text-xs text-muted hover:text-fg" aria-label="Close terminal">
             esc
           </button>
         </div>
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 font-mono text-sm leading-relaxed text-[#c9f7d4]">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 font-mono text-sm leading-relaxed text-fg-2">
           {history.map((entry, i) => (
             <div key={i} className="mb-2">
               {entry.prompt !== undefined && (
                 <div>
-                  <span className="text-indigo">❯</span> <span className="text-fg">{entry.prompt}</span>
+                  <span className="text-accent">❯</span> <span className="text-fg">{entry.prompt}</span>
                 </div>
               )}
               {entry.lines.map((line, j) => (
@@ -112,13 +113,13 @@ export default function Terminal({
             </div>
           ))}
           <div className="flex items-center gap-2">
-            <span className="text-indigo">❯</span>
+            <span className="text-accent">❯</span>
             <input
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
-              className="flex-1 bg-transparent font-mono text-base text-fg md:text-sm caret-[#c9f7d4] outline-none"
+              className="flex-1 bg-transparent font-mono text-base text-fg md:text-sm caret-accent outline-none"
               spellCheck={false}
               autoComplete="off"
               aria-label="Terminal input"

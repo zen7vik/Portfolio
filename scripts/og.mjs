@@ -3,33 +3,32 @@ import { chromium } from '@playwright/test'
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 2 })
 await page.setContent(`
+<link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@75..125,200..900&family=Geist+Mono&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; box-sizing: border-box; }
-  body { width: 1200px; height: 630px; background: #0a0a0f; color: #e8e8ea;
-    font-family: -apple-system, 'Helvetica Neue', sans-serif; padding: 80px;
-    display: flex; flex-direction: column; justify-content: space-between;
-    background-image: radial-gradient(ellipse 70% 55% at 75% 30%, #171a30 0%, transparent 70%); }
-  .dots { position: absolute; inset: 0; background-image: radial-gradient(#7c8cff22 1.5px, transparent 1.5px); background-size: 26px 26px; }
-  h1 { font-size: 110px; font-weight: 800; letter-spacing: -4px; }
-  h1 span { color: #7c8cff; }
-  p.tag { font-size: 34px; color: #8a8a95; margin-top: 18px; }
-  .stats { display: flex; gap: 16px; }
-  .pill { border: 1.5px solid #33333d; border-radius: 99px; padding: 12px 24px; font-size: 22px;
-    font-family: Menlo, monospace; color: #b8b8c0; }
-  .pill b { color: #e8e8ea; }
+  body { width: 1200px; height: 630px; background: #0c0c0d; color: #eeeeec; font-family: 'Mona Sans', sans-serif;
+    padding: 72px 80px; display: flex; flex-direction: column; justify-content: space-between; }
+  .who { font-size: 26px; color: #c2c2be; }
+  h1 { font-size: 104px; line-height: 0.95; font-weight: 760; font-variation-settings: 'wdth' 118; letter-spacing: -0.035em; margin-top: 26px; }
+  h1 span { color: #ff5d2e; }
+  .stats { display: flex; border-top: 1px solid rgb(238 238 236 / 0.12); }
+  .stat { flex: 1; padding-top: 26px; }
+  .stat + .stat { border-left: 1px solid rgb(238 238 236 / 0.12); padding-left: 28px; }
+  .v { font-size: 46px; font-weight: 760; font-variation-settings: 'wdth' 118; letter-spacing: -0.03em; }
+  .l { font-size: 19px; color: #8d8d8a; margin-top: 6px; }
 </style>
-<div class="dots"></div>
 <div>
-  <h1>Satvik Singh<span>.</span></h1>
-  <p class="tag">Fullstack AI engineer. I build distributed systems that don't fall over.</p>
+  <p class="who">Satvik Singh, fullstack AI engineer</p>
+  <h1>I build systems<br>that stay <span>up.</span></h1>
 </div>
 <div class="stats">
-  <span class="pill"><b>500M</b> events/mo</span>
-  <span class="pill"><b>p99 585ms</b></span>
-  <span class="pill"><b>6</b> regions</span>
-  <span class="pill"><b>147K</b> workflows/mo</span>
+  <div class="stat"><p class="v">72M</p><p class="l">risk calculations a month</p></div>
+  <div class="stat"><p class="v">-53%</p><p class="l">p95 latency</p></div>
+  <div class="stat"><p class="v">3.8%</p><p class="l">workflow failure rate</p></div>
 </div>
 `)
+await page.waitForLoadState('networkidle')
+await page.evaluate(() => document.fonts.ready)
 await page.waitForTimeout(300)
 await page.screenshot({ path: 'public/og.png' })
 await browser.close()

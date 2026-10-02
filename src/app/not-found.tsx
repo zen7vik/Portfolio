@@ -2,13 +2,12 @@ import Link from 'next/link'
 
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-      <p className="font-mono text-sm text-indigo">404</p>
-      <h1 className="mt-4 font-display text-4xl font-bold tracking-tight md:text-6xl">This route fell over.</h1>
-      <p className="mt-4 text-muted">Unlike my systems, this page doesn't exist.</p>
+    <main className="mx-auto flex min-h-[100dvh] max-w-[1320px] flex-col justify-center px-5 md:px-10">
+      <p className="tabular font-mono text-sm text-accent">404</p>
+      <h1 className="display mt-5 max-w-3xl text-[clamp(2.8rem,7vw,5.6rem)] text-fg">This page is down. The rest is fine.</h1>
       <Link
         href="/"
-        className="mt-10 rounded-full border border-indigo px-6 py-3 font-mono text-sm uppercase tracking-widest transition-colors hover:bg-indigo hover:text-bg"
+        className="mt-10 inline-flex h-12 w-fit items-center rounded-full bg-accent px-6 text-[0.95rem] font-semibold text-on-accent transition-transform hover:-translate-y-0.5"
       >
         Back home
       </Link>

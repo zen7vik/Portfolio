@@ -10,7 +10,7 @@ import { prefersReducedMotion } from '@/lib/motion'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
 
-export default function Scrolly({ case: slug, accent = '#7c8cff' }: { case: string; accent?: string }) {
+export default function Scrolly({ case: slug }: { case: string }) {
   const diagram = getCaseDiagram(slug)
   const containerRef = useRef<HTMLDivElement>(null)
   const [activeStep, setActiveStep] = useState(0)
@@ -41,30 +41,27 @@ export default function Scrolly({ case: slug, accent = '#7c8cff' }: { case: stri
     : (diagram.steps[activeStep]?.highlight ?? [])
 
   return (
-    <div ref={containerRef} className="my-16 lg:grid lg:grid-cols-2 lg:gap-12">
-      {/* mobile: diagram inline first; desktop: sticky right column */}
-      <div className="order-2 hidden lg:block">
-        <div className="sticky top-24 rounded-2xl border border-fg/10 bg-bg/70 p-6 backdrop-blur-sm">
-          <SystemDiagram diagram={diagram} active={active} accent={accent} />
+    <div ref={containerRef} className="my-16 lg:grid lg:grid-cols-12 lg:gap-14">
+      {/* mobile: diagram pinned under the nav; desktop: sticky right column */}
+      <div className="order-2 hidden lg:col-span-7 lg:block">
+        <div className="sticky top-28 rounded-2xl border border-line bg-raised/60 p-6">
+          <SystemDiagram diagram={diagram} active={active} />
         </div>
       </div>
-      <div className="sticky top-16 z-10 order-1 lg:hidden">
-        <div className="rounded-2xl border border-fg/10 bg-bg/90 p-3 backdrop-blur-md">
-          <SystemDiagram diagram={diagram} active={active} accent={accent} />
+      <div className="sticky top-[4.25rem] z-10 order-1 lg:hidden">
+        <div className="rounded-2xl border border-line bg-bg/95 p-3 backdrop-blur-md">
+          <SystemDiagram diagram={diagram} active={active} />
         </div>
       </div>
-      <div className="order-1 mt-10 lg:mt-0">
+      <div className="order-1 mt-10 lg:col-span-5 lg:mt-0">
         {diagram.steps.map((step, i) => (
           <div
             key={step.id}
             className="scrolly-step flex min-h-[45vh] flex-col justify-center py-8 lg:min-h-[60vh]"
             style={{ opacity: reduced || i === activeStep ? 1 : 0.35, transition: 'opacity 0.4s' }}
           >
-            <span className="font-mono text-xs" style={{ color: accent }}>
-              {String(i + 1).padStart(2, '0')} / {String(diagram.steps.length).padStart(2, '0')}
-            </span>
-            <h3 className="mt-2 font-display text-2xl font-bold tracking-tight">{step.title}</h3>
-            <p className="mt-4 max-w-md leading-relaxed text-muted">{step.body}</p>
+            <h3 className="display-tight text-[1.6rem] text-fg">{step.title}</h3>
+            <p className="mt-4 max-w-md text-[1.05rem] leading-relaxed text-fg-2">{step.body}</p>
           </div>
         ))}
       </div>

@@ -35,6 +35,8 @@ export default function CommandPalette({
     }
     return [
       { label: 'Work', group: 'Go to', run: nav('/#work') },
+      { label: 'Experience', group: 'Go to', run: nav('/#experience') },
+      { label: 'Projects', group: 'Go to', run: nav('/#projects') },
       { label: 'Writing', group: 'Go to', run: nav('/#writing') },
       { label: 'Contact', group: 'Go to', run: nav('/#contact') },
       ...cases.map((c) => ({ label: c.title, group: 'Case studies', run: nav(`/work/${c.slug}`) })),
@@ -96,7 +98,7 @@ export default function CommandPalette({
       aria-label="Command palette"
     >
       <div
-        className="w-full max-w-lg overflow-hidden rounded-xl border border-fg/20 bg-[#10131d] shadow-2xl"
+        className="w-full max-w-lg overflow-hidden rounded-2xl border border-line bg-bg shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <input
@@ -105,7 +107,7 @@ export default function CommandPalette({
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={onKeyDown}
           placeholder="Type to search…"
-          className="w-full border-b border-fg/10 bg-transparent px-5 py-4 font-mono text-base md:text-sm text-fg outline-none placeholder:text-muted/60"
+          className="w-full border-b border-fg/10 bg-transparent px-5 py-4 text-base text-fg outline-none placeholder:text-muted/60"
           spellCheck={false}
           aria-label="Palette search"
         />
@@ -116,8 +118,8 @@ export default function CommandPalette({
               key={`${it.group}-${it.label}`}
               onClick={it.run}
               onMouseEnter={() => setSelected(i)}
-              className={`flex w-full items-center justify-between px-5 py-2.5 text-left font-mono text-sm transition-colors ${
-                i === selected ? 'bg-indigo/15 text-fg' : 'text-muted'
+              className={`flex w-full items-center justify-between px-5 py-2.5 text-left text-[0.95rem] transition-colors ${
+                i === selected ? 'bg-fg/[0.06] text-fg' : 'text-muted'
               }`}
             >
               <span>{it.label}</span>

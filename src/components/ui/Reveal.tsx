@@ -1,46 +1,29 @@
 'use client'
 
-import { useRef } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { useGSAP } from '@gsap/react'
-import { prefersReducedMotion } from '@/lib/motion'
+import { motion, useReducedMotion } from 'motion/react'
 
-gsap.registerPlugin(useGSAP, ScrollTrigger)
+export const EASE = [0.16, 1, 0.3, 1] as const
 
 type RevealProps = {
   children: React.ReactNode
   delay?: number
   className?: string
-  /** reveal on a timer instead of on scroll (for above-the-fold content) */
+  /** play on mount instead of on scroll (above-the-fold content) */
   immediate?: boolean
+  y?: number
 }
 
-export default function Reveal({ children, delay = 0, className, immediate = false }: RevealProps) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useGSAP(
-    () => {
-      if (prefersReducedMotion() || !ref.current) return
-      gsap.fromTo(
-        ref.current,
-        { y: 24, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.9,
-          delay,
-          ease: 'power3.out',
-          ...(immediate ? {} : { scrollTrigger: { trigger: ref.current, start: 'top 85%' } }),
-        },
-      )
-    },
-    { scope: ref },
-  )
-
+export default function Reveal({ children, delay = 0, className, immediate = false, y = 22 }: RevealProps) {
+  const reduce = useReducedMotion()
+  const to = { opacity: 1, y: 0 }
   return (
-    <div ref={ref} className={className}>
+    <motion.div
+      className={className}
+      initial={reduce ? false : { opacity: 0, y }}
+      {...(immediate ? { animate: to } : { whileInView: to, viewport: { once: true, amount: 0.25 } })}
+      transition={{ duration: 0.9, delay, ease: EASE }}
+    >
       {children}
-    </div>
+    </motion.div>
   )
 }

@@ -1,19 +1,9 @@
-import TransitionLink from '@/components/scene/TransitionLink'
-import CaseSceneSetter from '@/components/case/CaseSceneSetter'
-import type { Formation } from '@/components/scene/formations'
-import ReadingProgress from '@/components/ui/ReadingProgress'
+import Link from 'next/link'
+import { ArrowLeft, ArrowRight } from '@phosphor-icons/react/dist/ssr'
 import Reveal from '@/components/ui/Reveal'
+import SplitWords from '@/components/ui/SplitWords'
+import SubNav from '@/components/ui/SubNav'
 import type { CaseMeta } from '@/lib/content'
-
-const ACCENTS = { indigo: '#7c8cff', green: '#58c48f', amber: '#f0b35e', rose: '#f27a8a' } as const
-
-// every case page gets its own particle shape
-const CASE_FORMATIONS: Record<string, Formation> = {
-  'workflow-platform': 'helix',
-  'risk-engine': 'wave',
-  'rag-pipeline': 'torus',
-  'data-exchange': 'twin',
-}
 
 export default function CaseLayout({
   meta,
@@ -26,68 +16,74 @@ export default function CaseLayout({
   next: CaseMeta | null
   children: React.ReactNode
 }) {
-  const accent = ACCENTS[meta.accent]
-  const formation = CASE_FORMATIONS[meta.slug] ?? 'ambient'
-
   return (
-    <main className="text-scrim">
-      <CaseSceneSetter accent={accent} formation={formation} />
-      <nav className="sticky top-0 z-20 border-b border-fg/10 bg-bg/80 backdrop-blur-md">
-        <div className="relative mx-auto flex max-w-5xl items-center justify-between px-6 py-4 md:px-12">
-          <TransitionLink href="/" className="font-mono text-sm text-muted transition-colors hover:text-fg">
-            ← satvik
-          </TransitionLink>
-          <span className="font-mono text-xs text-muted/70">work / {meta.slug}</span>
-        </div>
-        <ReadingProgress accent={accent} />
-      </nav>
+    <>
+      <SubNav back="/#work" label="Case study" />
+      <main>
+        <header className="mx-auto max-w-[1320px] px-5 pb-14 pt-16 md:px-10 md:pt-24">
+          <Reveal immediate>
+            <p className="text-[0.95rem] text-fg-2">
+              {meta.role}, {meta.period}
+            </p>
+          </Reveal>
+          <SplitWords
+            as="h1"
+            immediate
+            delay={0.1}
+            text={meta.title}
+            className="display mt-5 max-w-5xl text-[clamp(2.5rem,6vw,5rem)]"
+          />
+          <Reveal immediate delay={0.45}>
+            <p className="mt-7 max-w-[44rem] text-lg leading-relaxed text-fg-2 md:text-xl md:leading-relaxed">
+              {meta.summary}
+            </p>
+          </Reveal>
+          <Reveal immediate delay={0.6}>
+            <dl className="mt-12 grid grid-cols-1 border-y border-line sm:grid-cols-3">
+              {meta.stats.map((s, i) => (
+                <div key={s.label} className={`py-6 sm:px-6 ${i ? 'border-t border-line sm:border-l sm:border-t-0' : 'sm:pl-0'}`}>
+                  <dt className="sr-only">{s.label}</dt>
+                  <dd>
+                    <span className="display block text-[2.6rem] text-fg">{s.value}</span>
+                    <span className="mt-2 block text-[0.95rem] text-muted">{s.label}</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </Reveal>
+        </header>
 
-      <header className="mx-auto max-w-5xl px-6 pb-16 pt-24 md:px-12">
-        <Reveal immediate>
-          <p className="font-mono text-xs uppercase tracking-[0.25em]" style={{ color: accent }}>
-            Case study
-          </p>
-          <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold tracking-tight md:text-6xl">{meta.title}</h1>
-          <p className="mt-5 max-w-2xl text-xl text-muted">{meta.hook}</p>
-        </Reveal>
-        <Reveal immediate delay={0.15}>
-          <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 font-mono text-sm text-muted">
-            <span>{meta.role}</span>
-            <span>{meta.period}</span>
+        <article className="mx-auto max-w-[1320px] px-5 pb-24 md:px-10">{children}</article>
+
+        <footer className="border-t border-line">
+          <div className="mx-auto grid max-w-[1320px] gap-px md:grid-cols-2">
+            {prev ? (
+              <Link href={`/work/${prev.slug}`} className="group px-5 py-12 md:px-10">
+                <span className="inline-flex items-center gap-2 text-sm text-muted">
+                  <ArrowLeft size={14} /> Previous
+                </span>
+                <span className="display-tight mt-3 block text-2xl text-fg transition-colors group-hover:text-accent-ink">
+                  {prev.title}
+                </span>
+              </Link>
+            ) : (
+              <span />
+            )}
+            {next ? (
+              <Link href={`/work/${next.slug}`} className="group px-5 py-12 text-right md:border-l md:border-line md:px-10">
+                <span className="inline-flex items-center gap-2 text-sm text-muted">
+                  Next <ArrowRight size={14} />
+                </span>
+                <span className="display-tight mt-3 block text-2xl text-fg transition-colors group-hover:text-accent-ink">
+                  {next.title}
+                </span>
+              </Link>
+            ) : (
+              <span />
+            )}
           </div>
-          <p className="mt-5 max-w-2xl font-mono text-xs leading-relaxed text-muted">
-            {meta.stats.map((s, i) => (
-              <span key={s.label}>
-                <span className="text-fg">{s.value}</span> {s.label}
-                {i < meta.stats.length - 1 && <span className="mx-2 text-muted/50">·</span>}
-              </span>
-            ))}
-          </p>
-        </Reveal>
-      </header>
-
-      <article className="case-prose mx-auto max-w-5xl px-6 pb-24 md:px-12">{children}</article>
-
-      <footer className="mx-auto max-w-5xl border-t border-fg/10 px-6 py-12 md:px-12">
-        <div className="flex items-center justify-between gap-6">
-          {prev ? (
-            <TransitionLink href={`/work/${prev.slug}`} className="group max-w-[45%]">
-              <span className="font-mono text-xs text-muted">← previous</span>
-              <p className="mt-1 font-display font-semibold transition-colors group-hover:text-indigo">{prev.title}</p>
-            </TransitionLink>
-          ) : (
-            <span />
-          )}
-          {next ? (
-            <TransitionLink href={`/work/${next.slug}`} className="group max-w-[45%] text-right">
-              <span className="font-mono text-xs text-muted">next →</span>
-              <p className="mt-1 font-display font-semibold transition-colors group-hover:text-indigo">{next.title}</p>
-            </TransitionLink>
-          ) : (
-            <span />
-          )}
-        </div>
-      </footer>
-    </main>
+        </footer>
+      </main>
+    </>
   )
 }

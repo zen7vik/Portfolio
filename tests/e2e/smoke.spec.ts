@@ -2,14 +2,14 @@ import { expect, test } from '@playwright/test'
 
 test('landing renders hero and all sections', async ({ page }) => {
   await page.goto('/')
-  await expect(page.locator('h1')).toContainText('Satvik')
-  for (const id of ['about', 'work', 'personal', 'writing', 'contact']) {
+  await expect(page.locator('h1')).toHaveAttribute('aria-label', 'I build systems that stay up.')
+  for (const id of ['work', 'experience', 'projects', 'writing', 'contact']) {
     await expect(page.locator(`#${id}`)).toBeAttached()
   }
 })
 
-test('all four case pages render with scrollytelling', async ({ page }) => {
-  for (const slug of ['workflow-platform', 'risk-engine', 'rag-pipeline', 'data-exchange']) {
+test('all five case pages render with scrollytelling', async ({ page }) => {
+  for (const slug of ['workflow-platform', 'risk-engine', 'temporal-migration', 'rag-pipeline', 'data-exchange']) {
     await page.goto(`/work/${slug}`)
     await expect(page.locator('h1')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'The problem' })).toBeVisible()
@@ -25,7 +25,7 @@ test('terminal opens, runs commands, navigates', async ({ page }) => {
   await expect(input).toBeVisible()
   await input.fill('whoami')
   await page.keyboard.press('Enter')
-  await expect(page.getByText('Fullstack AI engineer · Go · TypeScript · distributed systems')).toBeVisible()
+  await expect(page.getByText('Fullstack AI engineer: Go, TypeScript, distributed systems, AI pipelines')).toBeVisible()
   await input.fill('open risk-engine')
   await page.keyboard.press('Enter')
   await expect(page).toHaveURL(/work\/risk-engine/)
@@ -51,5 +51,17 @@ test('resume downloads as pdf', async ({ page }) => {
 
 test('404 page renders in theme', async ({ page }) => {
   await page.goto('/work/does-not-exist')
-  await expect(page.getByText('This route fell over.')).toBeVisible()
+  await expect(page.getByText('This page is down. The rest is fine.')).toBeVisible()
+})
+
+test('playground reroutes when workers are taken down', async ({ page }) => {
+  await page.goto('/')
+  const stat = (i: number) => page.locator('dl.meta dd').nth(i)
+  // wait until hydrated and serving
+  await expect.poll(async () => Number((await stat(0).textContent())?.replace(/,/g, '')), { timeout: 10_000 }).toBeGreaterThan(0)
+  for (const n of [1, 2, 3]) {
+    await page.getByRole('button', { name: `Toggle worker ${n}` }).focus()
+    await page.keyboard.press('Enter')
+  }
+  await expect.poll(async () => Number((await stat(1).textContent())?.replace(/,/g, '')), { timeout: 10_000 }).toBeGreaterThan(0)
 })

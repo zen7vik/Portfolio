@@ -10,7 +10,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (prefersReducedMotion()) return
     gsap.registerPlugin(ScrollTrigger)
-    const lenis = new Lenis({ lerp: 0.12 })
+    const lenis = new Lenis({ lerp: 0.11, anchors: { offset: -72 }, allowNestedScroll: true })
     lenis.on('scroll', ScrollTrigger.update)
     const raf = (t: number) => lenis.raf(t * 1000)
     gsap.ticker.add(raf)
