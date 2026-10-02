@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { AdaptiveDpr, ContactShadows, Html, PerformanceMonitor, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
@@ -47,11 +47,14 @@ function Rig({ narrow }: { narrow: boolean }) {
   const target = useMemo(() => ROOM_TARGET.clone(), [])
   const pos = useMemo(() => new THREE.Vector3(), [])
   const look = useMemo(() => new THREE.Vector3(), [])
+  const dbg = useMemo(
+    () => (process.env.NODE_ENV !== 'production' && typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('cam') : null),
+    [],
+  )
 
   useFrame(({ pointer }, dt) => {
     const cam = camera as THREE.PerspectiveCamera
     const k = 1 - Math.exp(-dt * 3.2)
-    const dbg = process.env.NODE_ENV !== 'production' && typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('cam') : null
     if (dbg === 'portrait') {
       pos.set(1.5, 1.75, 0.55)
       look.set(0.15, 1.08, -1.4)
@@ -127,15 +130,15 @@ function Monitor() {
   const focus = useRoom((s) => s.focus)
   const active = focus === 'monitor'
   const { tex, draw } = useMemo(() => makeScreenTexture(), [])
+  const glow = useRef<THREE.MeshBasicMaterial>(null)
   useEffect(() => {
     document.fonts?.ready.then(() => draw())
-    let on = false
-    const id = setInterval(() => {
-      on = !on
-      draw(on ? 1 : 0)
-    }, 700)
+    const id = setInterval(() => draw(), 60000)
     return () => clearInterval(id)
   }, [draw])
+  useFrame(({ clock }) => {
+    if (glow.current) glow.current.opacity = active ? 0 : 0.18 + Math.sin(clock.elapsedTime * 4) * 0.18
+  })
   useEffect(() => () => tex.dispose(), [tex])
 
   return (
@@ -155,6 +158,11 @@ function Monitor() {
         <mesh position={[0, 0.41, 0.0235]}>
           <planeGeometry args={[1.04, 0.624]} />
           <meshBasicMaterial map={tex} toneMapped={false} />
+        </mesh>
+        {/* pulse over the 'click the screen' button, animated on the GPU instead of redrawing the texture */}
+        <mesh position={[-0.0955, 0.41 - 0.1179, 0.0245]}>
+          <planeGeometry args={[0.24, 0.043]} />
+          <meshBasicMaterial ref={glow} color="#ffd2bf" transparent opacity={0} toneMapped={false} depthWrite={false} />
         </mesh>
       </Interactive>
       {/* screen glow onto the desk and the person */}
