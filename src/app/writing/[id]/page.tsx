@@ -28,7 +28,7 @@ export default async function WritingPage({ params }: PageProps<'/writing/[id]'>
 
   return (
     <>
-      <SubNav back="/#writing" label="Writing" />
+      <SubNav back="/" label="Writing" />
       <main>
         <article className="mx-auto max-w-[44rem] px-5 pb-24 pt-16 md:pt-24">
           <p className="text-[0.95rem] text-fg-2">

@@ -18,7 +18,7 @@ export default function CaseLayout({
 }) {
   return (
     <>
-      <SubNav back="/#work" label="Case study" />
+      <SubNav back="/" label="Case study" />
       <main>
         <header className="mx-auto max-w-[1320px] px-5 pb-14 pt-16 md:px-10 md:pt-24">
           <Reveal immediate>

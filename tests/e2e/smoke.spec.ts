@@ -1,8 +1,14 @@
 import { expect, test } from '@playwright/test'
 
-test('landing renders hero and all sections', async ({ page }) => {
+test('room loads and the loader clears', async ({ page }) => {
   await page.goto('/')
-  await expect(page.locator('h1')).toHaveAttribute('aria-label', 'I build systems that stay up.')
+  await expect(page.getByText('Satvik Singh', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText('Brewing chai, waking the cat...')).toBeHidden({ timeout: 30_000 })
+  await expect(page.getByText(/Found 0 of 13 things/)).toBeVisible()
+})
+
+test('read page has every section', async ({ page }) => {
+  await page.goto('/read')
   for (const id of ['work', 'experience', 'projects', 'writing', 'contact']) {
     await expect(page.locator(`#${id}`)).toBeAttached()
   }
@@ -18,7 +24,7 @@ test('all five case pages render with scrollytelling', async ({ page }) => {
 })
 
 test('terminal opens, runs commands, navigates', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/read')
   await page.waitForTimeout(1000)
   await page.keyboard.press('`')
   const input = page.getByRole('textbox', { name: 'Terminal input' })
@@ -32,7 +38,7 @@ test('terminal opens, runs commands, navigates', async ({ page }) => {
 })
 
 test('command palette navigates to a case study', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/read')
   await page.waitForTimeout(1000)
   await page.keyboard.press('ControlOrMeta+k')
   const input = page.getByRole('textbox', { name: 'Palette search' })
@@ -43,7 +49,7 @@ test('command palette navigates to a case study', async ({ page }) => {
 })
 
 test('resume downloads as pdf', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/read')
   const dl = page.waitForEvent('download')
   await page.getByRole('link', { name: /resume/i }).first().click()
   expect((await dl).suggestedFilename()).toContain('.pdf')
@@ -52,16 +58,4 @@ test('resume downloads as pdf', async ({ page }) => {
 test('404 page renders in theme', async ({ page }) => {
   await page.goto('/work/does-not-exist')
   await expect(page.getByText('This page is down. The rest is fine.')).toBeVisible()
-})
-
-test('playground reroutes when workers are taken down', async ({ page }) => {
-  await page.goto('/')
-  const stat = (i: number) => page.locator('dl.meta dd').nth(i)
-  // wait until hydrated and serving
-  await expect.poll(async () => Number((await stat(0).textContent())?.replace(/,/g, '')), { timeout: 10_000 }).toBeGreaterThan(0)
-  for (const n of [1, 2, 3]) {
-    await page.getByRole('button', { name: `Toggle worker ${n}` }).focus()
-    await page.keyboard.press('Enter')
-  }
-  await expect.poll(async () => Number((await stat(1).textContent())?.replace(/,/g, '')), { timeout: 10_000 }).toBeGreaterThan(0)
 })
