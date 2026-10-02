@@ -52,6 +52,14 @@ function Rig({ narrow }: { narrow: boolean }) {
     const cam = camera as THREE.PerspectiveCamera
     const k = 1 - Math.exp(-dt * 3.2)
     const dbg = process.env.NODE_ENV !== 'production' && typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('cam') : null
+    if (dbg === 'portrait') {
+      pos.set(1.5, 1.75, 0.55)
+      look.set(0.15, 1.08, -1.4)
+      cam.position.copy(pos)
+      target.copy(look)
+      cam.lookAt(target)
+      return
+    }
     if (dbg === 'front' || dbg === 'back') {
       // dev-only close-ups of the character
       pos.set(dbg === 'front' ? 0.15 : 0.6, 1.35, dbg === 'front' ? -2.0 : -0.4)

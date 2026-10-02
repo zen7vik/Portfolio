@@ -255,16 +255,10 @@ export function Avatar() {
                     {mat(SKIN_SHADE)}
                   </mesh>
                   {/* moustache */}
-                  <mesh position={[0, -0.05, -0.006]} rotation={[0, 0, Math.PI / 2]}>
-                    <capsuleGeometry args={[0.0055, 0.04, 4, 8]} />
+                  <mesh position={[0, -0.05, -0.006]} rotation={[0, 0, Math.PI / 2]} scale={[1, 1, 0.7]}>
+                    <capsuleGeometry args={[0.0058, 0.046, 4, 8]} />
                     {mat(HAIR)}
                   </mesh>
-                  {[-1, 1].map((sx) => (
-                    <mesh key={sx} position={[sx * 0.03, -0.056, -0.004]} rotation={[0, 0, Math.PI / 2 + sx * 0.7]}>
-                      <capsuleGeometry args={[0.005, 0.012, 4, 8]} />
-                      {mat(HAIR)}
-                    </mesh>
-                  ))}
                   {/* smile */}
                   <mesh ref={smile} position={[0, -0.07, 0.001]} rotation={[0, 0, Math.PI]} scale={[1, 0.55, 1]}>
                     <torusGeometry args={[0.017, 0.0026, 6, 16, Math.PI]} />
@@ -274,10 +268,6 @@ export function Avatar() {
                   <mesh position={[0, -0.106, 0.009]} scale={[1.05, 0.75, 0.3]}>
                     <sphereGeometry args={[0.014, 14, 10]} />
                     {mat(HAIR, 0.9)}
-                  </mesh>
-                  <mesh position={[0, -0.088, -0.003]}>
-                    <boxGeometry args={[0.008, 0.012, 0.004]} />
-                    {mat(HAIR)}
                   </mesh>
                 </group>
               </group>
