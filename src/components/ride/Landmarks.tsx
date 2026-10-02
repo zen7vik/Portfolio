@@ -1,11 +1,11 @@
 'use client'
 
-import { useMemo, useRef } from 'react'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
-import { Html, RoundedBox } from '@react-three/drei'
+import { Billboard, RoundedBox, Text } from '@react-three/drei'
 import { CuboidCollider, CylinderCollider, RigidBody } from '@react-three/rapier'
-import { getState, setState, useRide, type LandmarkId } from '@/components/ride/store'
+import { autoPose, getState, setState, useRide, type LandmarkId } from '@/components/ride/store'
 import { sfx } from '@/components/ride/sound'
 import { C, LANDMARKS, SKY, polar, type LandmarkDef } from '@/components/ride/world-config'
 
@@ -13,27 +13,46 @@ type Hit = { other: { rigidBodyObject?: THREE.Object3D } }
 const isAuto = (e: Hit) => e.other.rigidBodyObject?.name === 'auto'
 
 function Windows({ w, h, d, rows, cols, lit, y0 = 0.6 }: { w: number; h: number; d: number; rows: number; cols: number; lit: boolean; y0?: number }) {
-  const cells = useMemo(() => {
-    const out: [number, number, boolean][] = []
+  const { on, off } = useMemo(() => {
+    const on: [number, number][] = []
+    const off: [number, number][] = []
     for (let r = 0; r < rows; r++)
-      for (let c = 0; c < cols; c++) out.push([-w / 2 + (w / cols) * (c + 0.5), y0 + (h / rows) * r, (r * 7 + c * 3) % 5 !== 0])
-    return out
+      for (let c = 0; c < cols; c++) {
+        const cell: [number, number] = [-w / 2 + (w / cols) * (c + 0.5), y0 + (h / rows) * r]
+        ;((r * 7 + c * 3) % 5 !== 0 ? on : off).push(cell)
+      }
+    return { on, off }
   }, [w, h, rows, cols, y0])
+  const size: [number, number, number] = [(w / cols) * 0.55, (h / rows) * 0.5, 0.02]
   return (
     <>
-      {cells.map(([x, y, on], i) => (
-        <mesh key={i} position={[x, y, d / 2 + 0.01]}>
-          <boxGeometry args={[(w / cols) * 0.55, (h / rows) * 0.5, 0.02]} />
-          <meshStandardMaterial
-            color={lit && on ? '#ffe3a1' : '#cfe8f3'}
-            emissive={lit && on ? '#ffc46b' : '#000000'}
-            emissiveIntensity={lit && on ? 1.6 : 0}
-            roughness={0.2}
-            toneMapped={!(lit && on)}
-          />
-        </mesh>
-      ))}
+      <Cells cells={on} z={d / 2 + 0.01} size={size} lit={lit} />
+      <Cells cells={off} z={d / 2 + 0.01} size={size} lit={false} />
     </>
+  )
+}
+
+function Cells({ cells, z, size, lit }: { cells: [number, number][]; z: number; size: [number, number, number]; lit: boolean }) {
+  const ref = useRef<THREE.InstancedMesh>(null)
+  useLayoutEffect(() => {
+    const m = new THREE.Matrix4()
+    cells.forEach(([x, y], i) => ref.current?.setMatrixAt(i, m.makeTranslation(x, y, z)))
+    if (ref.current) {
+      ref.current.instanceMatrix.needsUpdate = true
+      ref.current.computeBoundingSphere()
+    }
+  }, [cells, z])
+  if (!cells.length) return null
+  return (
+    <instancedMesh ref={ref} args={[undefined, undefined, cells.length]}>
+      <boxGeometry args={size} />
+      <meshStandardMaterial
+        color={lit ? '#ffe3a1' : '#cfe8f3'}
+        emissive={lit ? '#ffc46b' : '#000000'}
+        emissiveIntensity={lit ? 1.3 : 0}
+        roughness={0.2}
+      />
+    </instancedMesh>
   )
 }
 
@@ -57,7 +76,7 @@ function Tower({ lit }: { lit: boolean }) {
       </RoundedBox>
       <Windows w={3.6} h={2.6} d={3.2} rows={2} cols={3} lit={lit} y0={9.6} />
       <RoundedBox args={[3.9, 0.5, 0.3]} radius={0.1} smoothness={3} position={[0, 12.3, 1.5]}>
-        <meshStandardMaterial color={C.accent} emissive={C.accent} emissiveIntensity={lit ? 1.6 : 0.3} toneMapped={!lit} />
+        <meshStandardMaterial color={C.accent} emissive={C.accent} emissiveIntensity={lit ? 1.2 : 0.3} />
       </RoundedBox>
       <mesh position={[0, 13.1, 0]}>
         <cylinderGeometry args={[0.05, 0.05, 1.6, 6]} />
@@ -65,7 +84,7 @@ function Tower({ lit }: { lit: boolean }) {
       </mesh>
       <mesh position={[0, 13.95, 0]}>
         <sphereGeometry args={[0.15, 10, 8]} />
-        <meshStandardMaterial color="#ff4d4d" emissive="#ff3b3b" emissiveIntensity={2.5} toneMapped={false} />
+        <meshStandardMaterial color="#ff4d4d" emissive="#ff3b3b" emissiveIntensity={1.6} />
       </mesh>
       <CuboidCollider args={[2.5, 6, 2.2]} position={[0, 6, 0]} />
     </group>
@@ -143,8 +162,7 @@ function Ticker() {
             <meshStandardMaterial
               color={c.up ? '#51cf66' : '#ff6b6b'}
               emissive={c.up ? '#40c057' : '#fa5252'}
-              emissiveIntensity={1.8}
-              toneMapped={false}
+              emissiveIntensity={1.3}
             />
           </mesh>
           <mesh>
@@ -163,7 +181,7 @@ function Ticker() {
           {Array.from({ length: 8 }, (_, i) => (
             <mesh key={i} position={[-2.8 + i * 0.7, 0, 0.02]}>
               <boxGeometry args={[0.4, 0.1, 0.01]} />
-              <meshStandardMaterial color={C.autoYellow} emissive={C.autoYellow} emissiveIntensity={1.4} toneMapped={false} />
+              <meshStandardMaterial color={C.autoYellow} emissive={C.autoYellow} emissiveIntensity={1.4} />
             </mesh>
           ))}
         </group>
@@ -216,7 +234,7 @@ function Office({ lit }: { lit: boolean }) {
       </RoundedBox>
       <Windows w={5.6} h={4.4} d={4} rows={4} cols={5} lit={lit} y0={0.9} />
       <RoundedBox args={[4.8, 0.8, 0.3]} radius={0.12} position={[0, 5.9, 0.6]} castShadow>
-        <meshStandardMaterial color="#1c7ed6" emissive="#1c7ed6" emissiveIntensity={lit ? 1.4 : 0.15} toneMapped={!lit} />
+        <meshStandardMaterial color="#1c7ed6" emissive="#1c7ed6" emissiveIntensity={lit ? 1.4 : 0.15} />
       </RoundedBox>
       <RoundedBox args={[1.4, 1.8, 0.2]} radius={0.06} position={[0, 0.9, 2.05]}>
         <meshStandardMaterial color="#9ec5ef" roughness={0.2} />
@@ -282,6 +300,8 @@ function Ring({ def }: { def: LandmarkDef }) {
 
   useFrame(({ clock }) => {
     const t = clock.elapsedTime
+    // keep the panel open until the auto is clearly away, so driving through fast still shows it
+    if (active && Math.hypot(autoPose.x - x, autoPose.z - z) > 7) setState({ active: null })
     if (ring.current) {
       const s = 1 + Math.sin(t * 3) * 0.06
       ring.current.scale.set(s, s, s)
@@ -300,14 +320,10 @@ function Ring({ def }: { def: LandmarkDef }) {
           if (getState().active !== def.id) sfx.open()
           setState({ active: def.id as LandmarkId })
         }}
-        onIntersectionExit={(e) => {
-          if (!isAuto(e as unknown as Hit)) return
-          if (getState().active === def.id) setState({ active: null })
-        }}
       />
       <mesh ref={ring} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
         <ringGeometry args={[1.55, 2, 40]} />
-        <meshBasicMaterial color={def.color} transparent opacity={active ? 1 : 0.85} toneMapped={false} />
+        <meshBasicMaterial color={def.color} transparent opacity={active ? 1 : 0.85} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.035, 0]}>
         <circleGeometry args={[1.55, 40]} />
@@ -321,42 +337,64 @@ function Ring({ def }: { def: LandmarkDef }) {
   )
 }
 
-const camDir = new THREE.Vector3()
-const toLabel = new THREE.Vector3()
-const labelWorld = new THREE.Vector3()
+const MONA = '/fonts/Mona-Sans-wght-800.ttf'
 
-// floating sign that hides itself when behind the camera or very far away
-function Label({ id, color, name }: { id: LandmarkId; color: string; name: string }) {
-  const anchor = useRef<THREE.Group>(null)
-  const el = useRef<HTMLDivElement>(null)
-  useFrame(({ camera }) => {
-    if (!anchor.current || !el.current) return
-    anchor.current.getWorldPosition(labelWorld)
-    camera.getWorldDirection(camDir)
-    toLabel.copy(labelWorld).sub(camera.position)
-    const dist = toLabel.length()
-    const facing = toLabel.normalize().dot(camDir)
-    const show = facing > 0.25 && dist < 70
-    el.current.style.opacity = show ? '1' : '0'
-  })
+const SIGN_TEXT: Record<LandmarkId, { title: string; sub: string }> = {
+  tower: { title: 'Safe Security', sub: 'Where I work: 5 systems' },
+  paisabazaar: { title: 'Paisabazaar', sub: 'My first job' },
+  nit: { title: 'NIT Meghalaya', sub: 'Where I studied' },
+  investiq: { title: 'InvestIQ', sub: 'My trading app' },
+  library: { title: 'Library', sub: 'Things I wrote' },
+  postbox: { title: 'Post office', sub: 'Say hi' },
+}
+
+
+/** Big name that floats above the building and always faces you. */
+function SkySign({ id, color }: { id: LandmarkId; color: string }) {
+  const visited = useRide((s) => s.visited.includes(id))
+  const t = SIGN_TEXT[id]
+  const width = Math.max(4.4, t.title.length * 0.62 + 1.2)
   return (
-    <group ref={anchor} position={[0, LABEL_HEIGHT[id], 0]}>
-      <Html center distanceFactor={22} zIndexRange={[10, 0]}>
-        <div ref={el} className="ride-sign" style={{ ['--sign' as string]: color, transition: 'opacity 0.3s' }}>
-          {name}
-        </div>
-      </Html>
-    </group>
+    <Billboard position={[0, 6.6, 0]} scale={0.8}>
+      <RoundedBox args={[width + 0.24, 1.84, 0.12]} radius={0.3} smoothness={3} position={[0.12, -0.12, -0.08]}>
+        <meshBasicMaterial color="#222222" />
+      </RoundedBox>
+      <RoundedBox args={[width, 1.7, 0.16]} radius={0.28} smoothness={3}>
+        <meshBasicMaterial color={color} />
+      </RoundedBox>
+      <Text font={MONA} fontSize={0.9} color="#ffffff" anchorX="center" anchorY="middle" position={[0, 0.2, 0.1]}>
+        {t.title}
+      </Text>
+      <Text font={MONA} fontSize={0.36} color="#ffffff" fillOpacity={0.9} anchorX="center" anchorY="middle" position={[0, -0.46, 0.1]}>
+        {visited ? 'Visited' : t.sub}
+      </Text>
+    </Billboard>
   )
 }
 
-const LABEL_HEIGHT: Record<LandmarkId, number> = {
-  tower: 15.2,
-  library: 7,
-  investiq: 7.2,
-  postbox: 4.6,
-  paisabazaar: 7.4,
-  nit: 8.6,
+/** Roadside board next to each ring, readable from the road. */
+function RoadSign({ def }: { def: LandmarkDef }) {
+  const [x, z] = polar(def.angle + 6.5, 27.2)
+  const t = SIGN_TEXT[def.id]
+  return (
+    <group position={[x, 0, z]} rotation={[0, (-def.angle * Math.PI) / 180, 0]}>
+      {[-1.25, 1.25].map((px) => (
+        <mesh key={px} position={[px, 0.8, -0.05]} castShadow>
+          <cylinderGeometry args={[0.07, 0.07, 1.6, 6]} />
+          <meshStandardMaterial color={C.slate} />
+        </mesh>
+      ))}
+      <RoundedBox args={[3.1, 1.15, 0.12]} radius={0.12} smoothness={3} position={[0, 1.95, 0]} castShadow>
+        <meshStandardMaterial color={def.color} roughness={0.6} />
+      </RoundedBox>
+      <Text font={MONA} fontSize={0.42} color="#ffffff" anchorX="center" anchorY="middle" position={[0, 2.12, 0.08]} maxWidth={2.9}>
+        {t.title}
+      </Text>
+      <Text font={MONA} fontSize={0.22} color="#ffffff" anchorX="center" anchorY="middle" position={[0, 1.72, 0.08]}>
+        Drive into the ring
+      </Text>
+    </group>
+  )
 }
 
 export default function Landmarks() {
@@ -371,14 +409,20 @@ export default function Landmarks() {
         return (
           <group key={l.id}>
             <RigidBody type="fixed" colliders={false} position={[x, 0, z]} rotation={[0, rot, 0]}>
-              {l.id === 'tower' && <Tower lit={lit} />}
-              {l.id === 'library' && <Library />}
-              {l.id === 'investiq' && <Ticker />}
-              {l.id === 'postbox' && <Postbox />}
-              {l.id === 'paisabazaar' && <Office lit={lit} />}
-              {l.id === 'nit' && <Hills />}
-              <Label id={l.id} color={l.color} name={l.name} />
+              <group userData={{ occluder: l.id !== 'postbox' }}>
+                {l.id === 'tower' && <Tower lit={lit} />}
+                {l.id === 'library' && <Library />}
+                {l.id === 'investiq' && <Ticker />}
+                {l.id === 'postbox' && <Postbox />}
+                {l.id === 'paisabazaar' && <Office lit={lit} />}
+                {l.id === 'nit' && <Hills />}
+              </group>
             </RigidBody>
+            {/* the name floats just behind the ring you drive into */}
+            <group position={[polar(l.angle, 28.4)[0], 0, polar(l.angle, 28.4)[1]]}>
+              <SkySign id={l.id} color={l.color} />
+            </group>
+            <RoadSign def={l} />
             <Ring def={l} />
           </group>
         )

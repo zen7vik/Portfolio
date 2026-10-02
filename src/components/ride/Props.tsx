@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useFrame, useLoader } from '@react-three/fiber'
-import { Html, RoundedBox } from '@react-three/drei'
+import { Html, RoundedBox, Text } from '@react-three/drei'
 import { CuboidCollider, CylinderCollider, RigidBody, type RapierRigidBody } from '@react-three/rapier'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
@@ -90,29 +90,20 @@ export function Letters() {
 /* ---------- server farm ---------- */
 
 function Rack({ position }: { position: [number, number, number] }) {
-  const leds = useMemo(() => Array.from({ length: 5 }, (_, i) => i), [])
   return (
     <>
       <RoundedBox args={[1, 1.15, 0.9]} radius={0.05} smoothness={3} castShadow receiveShadow position={position}>
         <meshStandardMaterial color={C.slate} roughness={0.6} />
       </RoundedBox>
-      {leds.map((i) => (
-        <mesh key={i} position={[position[0] - 0.3 + (i % 3) * 0.12, position[1] + 0.38 - i * 0.18, position[2] + 0.452]}>
-          <boxGeometry args={[0.07, 0.05, 0.01]} />
-          <meshStandardMaterial
-            color="#69db7c"
-            emissive={i === 3 ? C.accent : '#51cf66'}
-            emissiveIntensity={2.4}
-            toneMapped={false}
-          />
-        </mesh>
-      ))}
-      {[0.12, -0.12, 0.3].map((dy) => (
-        <mesh key={dy} position={[position[0] + 0.15, position[1] + dy, position[2] + 0.452]}>
-          <boxGeometry args={[0.5, 0.02, 0.01]} />
-          <meshStandardMaterial color="#2a2f3e" />
-        </mesh>
-      ))}
+      {/* LED column and one orange status light, two meshes instead of eight */}
+      <mesh position={[position[0] - 0.3, position[1] + 0.02, position[2] + 0.452]}>
+        <boxGeometry args={[0.07, 0.8, 0.01]} />
+        <meshStandardMaterial color="#69db7c" emissive="#51cf66" emissiveIntensity={1.4} />
+      </mesh>
+      <mesh position={[position[0] + 0.15, position[1] + 0.02, position[2] + 0.452]}>
+        <boxGeometry args={[0.5, 0.42, 0.01]} />
+        <meshStandardMaterial color="#2a2f3e" emissive={C.accent} emissiveIntensity={0.15} />
+      </mesh>
     </>
   )
 }
@@ -152,9 +143,12 @@ export function ServerFarm() {
           <boxGeometry args={[0.08, 1, 0.08]} />
           <meshStandardMaterial color={C.woodDark} />
         </mesh>
-        <Html position={[0, 1.2, 0]} center distanceFactor={15} zIndexRange={[10, 0]}>
-          <div className="ride-tag">prod cluster, please do not crash</div>
-        </Html>
+        <RoundedBox args={[2.6, 0.62, 0.08]} radius={0.08} smoothness={3} position={[0, 1.25, 0]}>
+          <meshStandardMaterial color="#ffffff" roughness={0.7} />
+        </RoundedBox>
+        <Text font="/fonts/Mona-Sans-wght-800.ttf" fontSize={0.2} color="#222222" anchorX="center" anchorY="middle" position={[0, 1.25, 0.05]} maxWidth={2.4} textAlign="center">
+          prod cluster, please do not crash
+        </Text>
       </group>
       {racks.map((p, i) => (
         <RigidBody
@@ -391,7 +385,7 @@ function ChaiCup({ id, p }: { id: string; p: [number, number, number] }) {
         </mesh>
         <mesh position={[0, -0.6, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.35, 0.5, 24]} />
-          <meshBasicMaterial color={C.autoYellow} transparent opacity={0.6} toneMapped={false} />
+          <meshBasicMaterial color={C.autoYellow} transparent opacity={0.6} />
         </mesh>
         {[0, 1, 2].map((i) => (
           <Steam key={i} offset={i} />
