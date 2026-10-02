@@ -15,6 +15,7 @@ export type RideState = {
   time: TimeOfDay
   farmDown: boolean
   celebrate: boolean
+  visited: LandmarkId[]
 }
 
 export const CHAI_TOTAL = 6
@@ -40,6 +41,7 @@ let state: RideState = {
   time: 'day',
   farmDown: false,
   celebrate: false,
+  visited: [],
 }
 
 const listeners = new Set<() => void>()
@@ -50,6 +52,7 @@ export function getState() {
 
 export function setState(patch: Partial<RideState> | ((s: RideState) => Partial<RideState>)) {
   const next = typeof patch === 'function' ? patch(state) : patch
+  if (next.active && !state.visited.includes(next.active)) next.visited = [...state.visited, next.active]
   state = { ...state, ...next }
   listeners.forEach((l) => l())
 }

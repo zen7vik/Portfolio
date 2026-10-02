@@ -4,8 +4,11 @@ import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useProgress } from '@react-three/drei'
+import Reader from '@/components/reader/Reader'
+import { isReaderOpen } from '@/components/reader/readerStore'
 import Joystick from '@/components/ride/Joystick'
 import Panel from '@/components/ride/Panel'
+import Wayfinder from '@/components/ride/Wayfinder'
 import { CHAI_TOTAL, controls, initTime, keys, setState, syncKeys, useRide, type TimeOfDay } from '@/components/ride/store'
 import { sfx } from '@/components/ride/sound'
 import type { RideData } from '@/components/ride/types'
@@ -155,8 +158,12 @@ export default function RideClient({ data }: { data: RideData }) {
 
   useEffect(() => {
     initTime()
-    setMobile(window.innerWidth < 760)
-    setTouch(window.matchMedia('(pointer: coarse)').matches)
+    const measure = () => {
+      setMobile(window.innerWidth < 760)
+      setTouch(window.matchMedia('(pointer: coarse)').matches)
+    }
+    measure()
+    window.addEventListener('resize', measure)
     const html = document.documentElement
     const prev = html.style.overflow
     html.style.overflow = 'hidden'
@@ -176,7 +183,7 @@ export default function RideClient({ data }: { data: RideData }) {
       return t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable
     }
     const down = (e: KeyboardEvent) => {
-      if (typing(e) || e.metaKey || e.ctrlKey) return
+      if (typing(e) || e.metaKey || e.ctrlKey || isReaderOpen()) return
       const k = map[e.code]
       if (k) {
         keys[k] = true
@@ -209,7 +216,8 @@ export default function RideClient({ data }: { data: RideData }) {
       window.removeEventListener('keydown', down)
       window.removeEventListener('keyup', up)
       window.removeEventListener('blur', blur)
-      setState({ active: null, started: false, chai: [], celebrate: false, farmDown: false })
+      window.removeEventListener('resize', measure)
+      setState({ active: null, started: false, chai: [], celebrate: false, farmDown: false, visited: [] })
     }
   }, [])
 
@@ -218,8 +226,10 @@ export default function RideClient({ data }: { data: RideData }) {
       <h1 className="sr-only">Satvik&apos;s Delhi: drive an auto-rickshaw around a tiny island of my work</h1>
       <Scene mobile={mobile} />
       <Hud />
+      <Wayfinder />
       <Panel data={data} />
       {touch && <Joystick />}
+      <Reader />
       <Loader />
     </main>
   )

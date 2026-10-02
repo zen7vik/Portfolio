@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { openReader } from '@/components/reader/readerStore'
 import { setState, useRide, type LandmarkId } from '@/components/ride/store'
 import type { RideData } from '@/components/ride/types'
 import { LANDMARKS } from '@/components/ride/world-config'
@@ -27,18 +27,24 @@ function Body({ id, data }: { id: LandmarkId; data: RideData }) {
         <>
           <p className="ride-lede">
             {safe.title}, {safe.period}. I own the risk-scoring engine and the workflow platform here. Five systems,
-            each with the problem, the design and what I would change:
+            each with the problem, the design and what I would change. Tap one to read it here:
           </p>
           <ol className="ride-list">
             {data.cases.map((c, i) => (
               <li key={c.slug}>
-                <Link href={`/work/${c.slug}`}>
+                <a
+                  href={`/work/${c.slug}`}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    openReader('case', c.slug)
+                  }}
+                >
                   <span className="ride-num">{i + 1}</span>
                   <span>
                     <strong>{c.title}</strong>
                     <em>{c.hook}</em>
                   </span>
-                </Link>
+                </a>
               </li>
             ))}
           </ol>
@@ -96,14 +102,23 @@ function Body({ id, data }: { id: LandmarkId; data: RideData }) {
         <ul className="ride-list ride-posts">
           {data.posts.map((p) => (
             <li key={p.id}>
-              <Link href={p.onSite ? `/writing/${p.id}` : p.url}>
+              <a
+                href={p.onSite ? `/writing/${p.id}` : p.url}
+                target={p.onSite ? undefined : '_blank'}
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  if (!p.onSite) return
+                  e.preventDefault()
+                  openReader('post', p.id)
+                }}
+              >
                 <span>
                   <strong>{p.title}</strong>
                   <em>
                     {date(p.publishedAt)}, {p.readingMinutes} min read
                   </em>
                 </span>
-              </Link>
+              </a>
             </li>
           ))}
         </ul>
@@ -149,7 +164,7 @@ export default function Panel({ data }: { data: RideData }) {
       <div className="ride-panel-body">
         <Body id={active} data={data} />
       </div>
-      <footer>Drive out of the ring to close.</footer>
+      <footer>Drive away or press Esc to close.</footer>
     </aside>
   )
 }

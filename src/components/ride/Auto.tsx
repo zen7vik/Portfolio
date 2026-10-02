@@ -5,6 +5,7 @@ import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
 import { CuboidCollider, RigidBody, useBeforePhysicsStep, type RapierRigidBody } from '@react-three/rapier'
+import { isReaderOpen } from '@/components/reader/readerStore'
 import { autoPose, controls, getState, setState, toast, useRide } from '@/components/ride/store'
 import { sfx } from '@/components/ride/sound'
 import { C, SPAWN } from '@/components/ride/world-config'
@@ -55,6 +56,7 @@ export default function Auto() {
   const wheelSpin = useRef(0)
   const honkCd = useRef(0)
   const glow = useRef<THREE.Group>(null)
+  const tail = useRef<THREE.MeshStandardMaterial>(null)
 
   const reset = () => {
     const b = body.current
@@ -103,19 +105,24 @@ export default function Auto() {
     let vr = v.x * right.x + v.z * right.z
 
     const grounded = t.y < 1.6
-    const target = controls.forward > 0 ? MAX_FWD * controls.forward : controls.forward < 0 ? -MAX_REV : 0
-    const braking = (controls.forward < 0 && vf > 0.5) || (controls.forward > 0 && vf < -0.5)
-    const rate = braking ? BRAKE : controls.forward === 0 ? 6 : ACCEL
+    // reading an article parks the auto
+    const paused = isReaderOpen()
+    const forward = paused ? 0 : controls.forward
+    const steer = paused ? 0 : controls.steer
+    const handbrake = paused || controls.brake
+    const target = forward > 0 ? MAX_FWD * forward : forward < 0 ? -MAX_REV : 0
+    const braking = paused || (forward < 0 && vf > 0.5) || (forward > 0 && vf < -0.5)
+    const rate = braking ? BRAKE : forward === 0 ? 6 : ACCEL
     if (grounded) {
       const dv = THREE.MathUtils.clamp(target - vf, -rate * dt, rate * dt)
       vf += dv
-      if (controls.brake) vf *= Math.exp(-1.6 * dt)
+      if (handbrake) vf *= Math.exp(-1.6 * dt)
       // lateral grip: tight normally, loose on handbrake for drifts
-      vr *= Math.exp(-(controls.brake ? 1.4 : 9) * dt)
+      vr *= Math.exp(-(handbrake && !paused ? 1.4 : 9) * dt)
       b.setLinvel({ x: fwd.x * vf + right.x * vr, y: v.y, z: fwd.z * vf + right.z * vr }, true)
 
       const speedFactor = THREE.MathUtils.clamp(vf / 5, -1, 1)
-      const turn = controls.steer * (controls.brake ? 3.1 : 2.3) * speedFactor
+      const turn = steer * (handbrake ? 3.1 : 2.3) * speedFactor
       b.setAngvel({ x: 0, y: turn, z: 0 }, true)
     }
 
@@ -192,6 +199,10 @@ export default function Auto() {
     controls.honk = false
 
     if (glow.current) glow.current.visible = getState().celebrate
+    if (tail.current) {
+      const braking = controls.brake || (controls.forward < 0 && vf > 0.5)
+      tail.current.emissiveIntensity = THREE.MathUtils.damp(tail.current.emissiveIntensity, braking ? 2.6 : 0.8, 12, dt)
+    }
   })
 
   return (
@@ -225,7 +236,7 @@ export default function Auto() {
           {/* headlight */}
           <mesh position={[0, 0.98, -1.08]}>
             <sphereGeometry args={[0.11, 12, 10]} />
-            <meshStandardMaterial color="#fff6d5" emissive="#ffe8a3" emissiveIntensity={2.2} toneMapped={false} />
+            <meshStandardMaterial color="#fff6d5" emissive="#ffe8a3" emissiveIntensity={1.6} />
           </mesh>
           {/* windshield */}
           <mesh position={[0, 1.32, -0.74]} rotation={[-0.18, 0, 0]}>
@@ -274,10 +285,14 @@ export default function Auto() {
             </mesh>
           ))}
           {/* tail lights */}
+          <mesh position={[0, 0.55, 1.01]}>
+            <boxGeometry args={[1.06, 0.1, 0.03]} />
+            <meshStandardMaterial color="#3a1010" />
+          </mesh>
           {[-0.45, 0.45].map((x) => (
-            <mesh key={x} position={[x, 0.55, 1.01]}>
+            <mesh key={x} position={[x, 0.55, 1.02]}>
               <boxGeometry args={[0.16, 0.1, 0.03]} />
-              <meshStandardMaterial color="#ff4d4d" emissive="#ff3b3b" emissiveIntensity={controls.brake ? 3 : 1.2} toneMapped={false} />
+              <meshStandardMaterial ref={x < 0 ? tail : undefined} color="#ff4d4d" emissive="#ff3b3b" emissiveIntensity={0.8} />
             </mesh>
           ))}
           {/* number plate */}
@@ -305,7 +320,7 @@ export default function Auto() {
         <group ref={glow} visible={false}>
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]}>
             <planeGeometry args={[1.6, 2.4]} />
-            <meshBasicMaterial color={C.accent} transparent opacity={0.55} toneMapped={false} />
+            <meshBasicMaterial color={C.accent} transparent opacity={0.55} depthWrite={false} />
           </mesh>
           <pointLight color={C.accent} intensity={6} distance={4} position={[0, 0.3, 0]} />
         </group>

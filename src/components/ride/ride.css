@@ -676,6 +676,116 @@
   }
 }
 
+/* minimap and next stop pointer */
+.ride-way {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.ride-way svg {
+  filter: drop-shadow(3px 3px 0 #222);
+}
+
+.ride-next {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.8rem 0.45rem 0.5rem;
+  border: 2.5px solid var(--ink);
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: 3px 3px 0 var(--ink);
+  line-height: 1.1;
+}
+
+.ride-next small {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 650;
+  opacity: 0.6;
+}
+
+.ride-next-name {
+  font-weight: 780;
+  font-size: 0.95rem;
+}
+
+.ride-next-dist {
+  margin-left: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  opacity: 0.65;
+}
+
+.ride-next-arrow {
+  display: inline-flex;
+  width: 1.9rem;
+  height: 1.9rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.05rem;
+  transition: transform 0.12s linear;
+}
+
+.ride-visited {
+  padding: 0.15rem 0.55rem;
+  border-radius: 8px;
+  background: rgb(34 34 34 / 0.75);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+@media (max-width: 760px) {
+  .ride-way {
+    left: auto;
+    right: 12px;
+    top: 112px;
+    bottom: auto;
+    align-items: flex-end;
+  }
+  .ride-way svg {
+    width: 92px;
+    height: 92px;
+  }
+  .ride-next {
+    padding: 0.3rem 0.6rem 0.3rem 0.35rem;
+  }
+  .ride-next-name {
+    font-size: 0.8rem;
+  }
+  .ride-next-arrow {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .ride-root:has(.ride-panel) .ride-way {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 760px) and (pointer: coarse) {
+  /* leave the joystick row free so you can always drive out of a ring */
+  .ride-panel {
+    bottom: calc(168px + env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 300px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ride-loader-horn,
   .ride-loader-horn span {

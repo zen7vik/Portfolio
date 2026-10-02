@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef } from 'react'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { RoundedBox, Stars } from '@react-three/drei'
@@ -16,29 +16,59 @@ function seeded(seed: number) {
   }
 }
 
-function Tree({ position, scale = 1, tone = 0 }: { position: [number, number, number]; scale?: number; tone?: number }) {
-  const greens = [C.grassDark, '#588157', '#7fa650']
+const TREE_GREENS = [C.grassDark, '#588157', '#7fa650']
+
+function Trees({ trees }: { trees: { p: [number, number, number]; s: number; t: number }[] }) {
+  const trunk = useRef<THREE.InstancedMesh>(null)
+  const crown = useRef<THREE.InstancedMesh>(null)
+  const top = useRef<THREE.InstancedMesh>(null)
+  useLayoutEffect(() => {
+    const m = new THREE.Matrix4()
+    const q = new THREE.Quaternion()
+    const sc = new THREE.Vector3()
+    const pos = new THREE.Vector3()
+    const col = new THREE.Color()
+    trees.forEach((t, i) => {
+      const [x, , z] = t.p
+      sc.setScalar(t.s)
+      q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), (i * 1.7) % 6.28)
+      m.compose(pos.set(x, 0.5 * t.s, z), q, sc)
+      trunk.current?.setMatrixAt(i, m)
+      m.compose(pos.set(x, 1.45 * t.s, z), q, sc)
+      crown.current?.setMatrixAt(i, m)
+      crown.current?.setColorAt(i, col.set(TREE_GREENS[t.t % 3]))
+      m.compose(pos.set(x + 0.25 * t.s, 2.0 * t.s, z + 0.1 * t.s), q, sc)
+      top.current?.setMatrixAt(i, m)
+      top.current?.setColorAt(i, col.set(TREE_GREENS[(t.t + 1) % 3]))
+    })
+    for (const r of [trunk, crown, top]) {
+      if (!r.current) continue
+      r.current.instanceMatrix.needsUpdate = true
+      if (r.current.instanceColor) r.current.instanceColor.needsUpdate = true
+      r.current.computeBoundingSphere()
+    }
+  }, [trees])
   return (
-    <group position={position} scale={scale}>
-      <mesh position={[0, 0.5, 0]} castShadow>
+    <>
+      <instancedMesh ref={trunk} args={[undefined, undefined, trees.length]} castShadow>
         <cylinderGeometry args={[0.13, 0.18, 1, 6]} />
         <meshStandardMaterial color={C.woodDark} roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 1.45, 0]} castShadow>
+      </instancedMesh>
+      <instancedMesh ref={crown} args={[undefined, undefined, trees.length]} castShadow>
         <icosahedronGeometry args={[0.85, 0]} />
-        <meshStandardMaterial color={greens[tone % 3]} roughness={0.85} flatShading />
-      </mesh>
-      <mesh position={[0.25, 2.0, 0.1]} castShadow>
+        <meshStandardMaterial roughness={0.85} flatShading />
+      </instancedMesh>
+      <instancedMesh ref={top} args={[undefined, undefined, trees.length]} castShadow>
         <icosahedronGeometry args={[0.55, 0]} />
-        <meshStandardMaterial color={greens[(tone + 1) % 3]} roughness={0.85} flatShading />
-      </mesh>
-    </group>
+        <meshStandardMaterial roughness={0.85} flatShading />
+      </instancedMesh>
+    </>
   )
 }
 
 function House({ position, rot, color }: { position: [number, number, number]; rot: number; color: string }) {
   return (
-    <group position={position} rotation={[0, rot, 0]}>
+    <group position={position} rotation={[0, rot, 0]} userData={{ occluder: true }}>
       <RoundedBox args={[2.2, 1.8, 2]} radius={0.08} position={[0, 0.9, 0]} castShadow receiveShadow>
         <meshStandardMaterial color={color} roughness={0.85} />
       </RoundedBox>
@@ -62,30 +92,39 @@ function House({ position, rot, color }: { position: [number, number, number]; r
   )
 }
 
-function LampPost({ position, on }: { position: [number, number, number]; on: boolean }) {
+function LampPosts({ spots, on }: { spots: [number, number][]; on: boolean }) {
+  const posts = useRef<THREE.InstancedMesh>(null)
+  const heads = useRef<THREE.InstancedMesh>(null)
+  useLayoutEffect(() => {
+    const m = new THREE.Matrix4()
+    spots.forEach(([x, z], i) => {
+      posts.current?.setMatrixAt(i, m.makeTranslation(x, 1.4, z))
+      heads.current?.setMatrixAt(i, m.makeTranslation(x, 2.85, z))
+    })
+    for (const r of [posts, heads]) {
+      if (!r.current) continue
+      r.current.instanceMatrix.needsUpdate = true
+      r.current.computeBoundingSphere()
+    }
+  }, [spots])
   return (
-    <group position={position}>
-      <mesh position={[0, 1.4, 0]} castShadow>
+    <>
+      <instancedMesh ref={posts} args={[undefined, undefined, spots.length]} castShadow>
         <cylinderGeometry args={[0.06, 0.08, 2.8, 6]} />
         <meshStandardMaterial color={C.slate} roughness={0.6} />
-      </mesh>
-      <mesh position={[0, 2.85, 0]}>
+      </instancedMesh>
+      <instancedMesh ref={heads} args={[undefined, undefined, spots.length]}>
         <sphereGeometry args={[0.2, 10, 8]} />
-        <meshStandardMaterial
-          color="#fff3d0"
-          emissive="#ffc46b"
-          emissiveIntensity={on ? 3 : 0}
-          toneMapped={!on}
-        />
-      </mesh>
-    </group>
+        <meshStandardMaterial color="#fff3d0" emissive="#ffc46b" emissiveIntensity={on ? 2.2 : 0} />
+      </instancedMesh>
+    </>
   )
 }
 
 function IndiaGate() {
   const [x, z] = polar(180, 31)
   return (
-    <group position={[x, 0, z]} rotation={[0, Math.PI, 0]}>
+    <group position={[x, 0, z]} rotation={[0, Math.PI, 0]} userData={{ occluder: true }}>
       {[-1.7, 1.7].map((px) => (
         <RoundedBox key={px} args={[1.4, 5, 1.4]} radius={0.06} position={[px, 2.5, 0]} castShadow receiveShadow>
           <meshStandardMaterial color="#e6b98a" roughness={0.85} />
@@ -165,6 +204,20 @@ function Road() {
     const n = 46
     return Array.from({ length: n }, (_, i) => (i / n) * Math.PI * 2)
   }, [])
+  const dashRef = useRef<THREE.InstancedMesh>(null)
+  useLayoutEffect(() => {
+    const o = new THREE.Object3D()
+    dashes.forEach((a, i) => {
+      o.position.set(Math.sin(a) * ROAD_R, 0.025, -Math.cos(a) * ROAD_R)
+      o.rotation.set(-Math.PI / 2, 0, -a)
+      o.updateMatrix()
+      dashRef.current?.setMatrixAt(i, o.matrix)
+    })
+    if (dashRef.current) {
+      dashRef.current.instanceMatrix.needsUpdate = true
+      dashRef.current.computeBoundingSphere()
+    }
+  }, [dashes])
   return (
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]} receiveShadow>
@@ -177,12 +230,10 @@ function Road() {
           <meshStandardMaterial color={C.warm} roughness={0.9} />
         </mesh>
       ))}
-      {dashes.map((a) => (
-        <mesh key={a} position={[Math.sin(a) * ROAD_R, 0.025, -Math.cos(a) * ROAD_R]} rotation={[-Math.PI / 2, 0, -a]}>
-          <planeGeometry args={[0.18, 1.2]} />
-          <meshStandardMaterial color={C.autoYellow} roughness={0.8} />
-        </mesh>
-      ))}
+      <instancedMesh ref={dashRef} args={[undefined, undefined, dashes.length]}>
+        <planeGeometry args={[0.18, 1.2]} />
+        <meshStandardMaterial color={C.autoYellow} roughness={0.8} />
+      </instancedMesh>
       {/* spoke road from spawn plaza out to the ring */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.011, 7]} receiveShadow>
         <planeGeometry args={[ROAD_W, 30]} />
@@ -197,7 +248,7 @@ function Road() {
   )
 }
 
-export function Sky() {
+export function Sky({ mobile = false }: { mobile?: boolean }) {
   const time = useRide((s) => s.time)
   const sky = SKY[time]
   const sun = useRef<THREE.DirectionalLight>(null)
@@ -207,8 +258,12 @@ export function Sky() {
   useFrame(() => {
     if (!sun.current) return
     const offset = time === 'dusk' ? [-22, 14, 10] : time === 'night' ? [12, 22, -14] : [16, 28, 12]
-    sun.current.position.set(autoPose.x + offset[0], offset[1], autoPose.z + offset[2])
-    target.position.set(autoPose.x, 0, autoPose.z)
+    // move in whole shadow-map texels so shadow edges do not crawl while driving
+    const texel = 56 / (mobile ? 1024 : 2048)
+    const sx = Math.round(autoPose.x / texel) * texel
+    const sz = Math.round(autoPose.z / texel) * texel
+    sun.current.position.set(sx + offset[0], offset[1], sz + offset[2])
+    target.position.set(sx, 0, sz)
     target.updateMatrixWorld()
   })
 
@@ -224,7 +279,7 @@ export function Sky() {
         intensity={sky.sunI}
         target={target}
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={mobile ? [1024, 1024] : [2048, 2048]}
         shadow-camera-left={-28}
         shadow-camera-right={28}
         shadow-camera-top={28}
@@ -234,7 +289,7 @@ export function Sky() {
         shadow-bias={-0.0006}
         shadow-normalBias={0.09}
       />
-      {time === 'night' && <Stars radius={110} depth={30} count={1800} factor={4} fade speed={0.6} />}
+      {time === 'night' && <Stars radius={110} depth={30} count={mobile ? 700 : 1400} factor={4} fade speed={0.6} />}
       {time === 'night' && <pointLight position={[0, 6, -2]} color="#ffc46b" intensity={30} distance={22} />}
     </>
   )
@@ -294,9 +349,7 @@ export default function World() {
       </RigidBody>
       <Water color={sky.water} />
       <Road />
-      {trees.map((t, i) => (
-        <Tree key={i} position={t.p} scale={t.s} tone={t.t} />
-      ))}
+      <Trees trees={trees} />
       {trees.map((t, i) => (
         <RigidBody key={`tc${i}`} type="fixed" colliders={false} position={t.p}>
           <CylinderCollider args={[1, 0.25 * t.s]} position={[0, 1, 0]} />
@@ -308,9 +361,7 @@ export default function World() {
           <House position={[0, 0, 0]} rot={0} color={h.c} />
         </RigidBody>
       ))}
-      {lamps.map(([x, z], i) => (
-        <LampPost key={i} position={[x, 0, z]} on={sky.lampsOn} />
-      ))}
+      <LampPosts spots={lamps} on={sky.lampsOn} />
       <IndiaGate />
       <Kites />
     </group>
