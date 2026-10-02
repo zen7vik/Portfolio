@@ -40,9 +40,17 @@ function Windows({ w, h, d, rows, cols, lit, y0 = 0.6 }: { w: number; h: number;
 function Tower({ lit }: { lit: boolean }) {
   return (
     <group>
-      <RoundedBox args={[5, 9, 4.4]} radius={0.15} smoothness={4} position={[0, 4.5, 0]} castShadow receiveShadow>
-        <meshStandardMaterial color="#e7edf0" roughness={0.6} />
+      <RoundedBox args={[5.6, 1.2, 5]} radius={0.12} smoothness={4} position={[0, 0.6, 0]} castShadow receiveShadow>
+        <meshStandardMaterial color={C.terracotta} roughness={0.8} />
       </RoundedBox>
+      <RoundedBox args={[5, 9, 4.4]} radius={0.15} smoothness={4} position={[0, 4.5, 0]} castShadow receiveShadow>
+        <meshStandardMaterial color="#f1e7d8" roughness={0.6} />
+      </RoundedBox>
+      {[-2.55, 2.55].map((x) => (
+        <RoundedBox key={x} args={[0.35, 9.4, 0.5]} radius={0.08} position={[x, 4.7, 2.0]} castShadow>
+          <meshStandardMaterial color={C.accent} roughness={0.6} />
+        </RoundedBox>
+      ))}
       <Windows w={5} h={8} d={4.4} rows={7} cols={4} lit={lit} y0={1} />
       <RoundedBox args={[3.6, 3, 3.2]} radius={0.12} smoothness={4} position={[0, 10.5, 0]} castShadow>
         <meshStandardMaterial color={C.teal} roughness={0.5} />

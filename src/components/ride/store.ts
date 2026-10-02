@@ -95,6 +95,7 @@ export function syncKeys() {
 // live auto pose for camera, landmarks and minimap
 export const autoPose = { x: 0, y: 0, z: 12, yaw: 0, speed: 0 }
 
-if (typeof window !== 'undefined') {
+// dev-only hook used by the screenshot scripts
+if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
   ;(window as unknown as { __ride: unknown }).__ride = { autoPose, controls, getState, setState }
 }
