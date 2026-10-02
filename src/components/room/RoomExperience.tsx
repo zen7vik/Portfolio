@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useProgress } from '@react-three/drei'
 import { SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react'
 import Discoveries from '@/components/room/Discoveries'
+import HoverLabel from '@/components/room/HoverLabel'
 import SatvikOS from '@/components/room/SatvikOS'
 import { setState, useRoom } from '@/components/room/store'
 import type { RoomData } from '@/components/room/types'
@@ -113,6 +114,7 @@ export default function RoomExperience({ data }: { data: RoomData }) {
       )}
 
       <Discoveries hidden={focus === 'monitor'} />
+      <HoverLabel />
       <Loader />
     </main>
   )

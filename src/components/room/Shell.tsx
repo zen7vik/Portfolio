@@ -4,7 +4,8 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
-import { C } from '@/components/room/kit'
+import { C, Interactive } from '@/components/room/kit'
+import { say, setState } from '@/components/room/store'
 
 const S = 2.6 // half room size
 
@@ -51,7 +52,16 @@ export function Shell({ night }: { night: boolean }) {
           <boxGeometry args={[S * 2, 0.12, 0.03]} />
           <meshStandardMaterial color={C.white} />
         </mesh>
-        <Window night={night} />
+        <Interactive
+          name="window"
+          hoverLift={0}
+          onClick={() => {
+            setState((st) => ({ night: !st.night }))
+            say('window', night ? 'Good morning, Delhi.' : 'And just like that, it is 3am again.', 2400)
+          }}
+        >
+          <Window night={night} />
+        </Interactive>
       </group>
 
       {/* rug */}

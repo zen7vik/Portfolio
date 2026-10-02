@@ -43,3 +43,5 @@ next-env.d.ts
 # workspace scratch
 .superpowers/
 test-results/
+
+.claude/worktrees/

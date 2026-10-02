@@ -17,6 +17,7 @@ type State = {
   openApp: string | null
   ready: boolean
   found: string[]
+  night: boolean
 }
 
 let state: State = {
@@ -29,6 +30,10 @@ let state: State = {
   openApp: null,
   ready: false,
   found: [],
+  night: (() => {
+    const h = new Date().getHours()
+    return h >= 19 || h < 6
+  })(),
 }
 
 const listeners = new Set<() => void>()

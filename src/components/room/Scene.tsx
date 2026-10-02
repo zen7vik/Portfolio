@@ -7,7 +7,7 @@ import * as THREE from 'three'
 import { Avatar } from '@/components/room/Avatar'
 import { Beanbag, Bookshelf, Cat, Corkboard, Plant, Poster, ServerRack, WallClock } from '@/components/room/Decor'
 import { Chai, DESK_Y, Desk, Lamp, Laptop, Pager } from '@/components/room/Desk'
-import { C, Interactive, isNight } from '@/components/room/kit'
+import { C, Interactive } from '@/components/room/kit'
 import SatvikOS from '@/components/room/SatvikOS'
 import { Shell } from '@/components/room/Shell'
 import { setState, useRoom } from '@/components/room/store'
@@ -29,6 +29,7 @@ export const ANCHORS: Record<string, [number, number, number]> = {
   cat: [-1.5, 0.95, 0.45],
   plant: [-2.2, 1.05, -2.15],
   monitor: [0.15, 1.75, -2.3],
+  window: [-2.4, 2.35, -0.1],
 }
 
 function Ready() {
@@ -158,7 +159,7 @@ function Lights({ night }: { night: boolean }) {
 }
 
 export default function Scene({ data, onRide }: { data: RoomData; onRide: () => void }) {
-  const [night] = useState(() => isNight())
+  const night = useRoom((s) => s.night)
   const [narrow, setNarrow] = useState(false)
   useEffect(() => {
     const check = () => setNarrow(window.innerWidth < 768)
