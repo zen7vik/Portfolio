@@ -14,6 +14,7 @@ import {
   type Icon,
 } from '@phosphor-icons/react'
 import { runCommand } from '@/components/terminal/commands'
+import { openReader } from '@/components/reader/readerStore'
 import { blip } from '@/components/room/sound'
 import type { RoomData } from '@/components/room/types'
 import { education, roles, stack } from '@/content/experience'
@@ -224,7 +225,15 @@ function AppBody({ id, data, onRide }: { id: AppId; data: RoomData; onRide: () =
       return (
         <div className="space-y-2">
           {data.cases.map((c) => (
-            <a key={c.slug} href={`/work/${c.slug}`} className="group block rounded-lg px-3 py-3 hover:bg-[#ff6a3d]/10">
+            <a
+              key={c.slug}
+              href={`/work/${c.slug}`}
+              onClick={(e) => {
+                e.preventDefault()
+                openReader('case', c.slug)
+              }}
+              className="group block rounded-lg px-3 py-3 hover:bg-[#ff6a3d]/10"
+            >
               <p className="text-[17px] font-semibold leading-snug text-[#1b1d24] group-hover:text-[#c23a12]">{c.title}</p>
               <p className="mt-1 text-[14px] text-[#5b5f6d]">{c.hook}</p>
               <p className="mt-1.5 flex flex-wrap gap-x-4 font-mono text-[12px] text-[#2b2e38]">
@@ -297,7 +306,18 @@ function AppBody({ id, data, onRide }: { id: AppId; data: RoomData; onRide: () =
       return (
         <div className="space-y-1">
           {data.posts.map((p) => (
-            <a key={p.id} href={p.href} target={p.external ? '_blank' : undefined} rel="noopener noreferrer" className="group block rounded-lg px-3 py-2.5 hover:bg-[#ff6a3d]/10">
+            <a
+              key={p.id}
+              href={p.href}
+              target={p.external ? '_blank' : undefined}
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                if (p.external) return
+                e.preventDefault()
+                openReader('post', p.id)
+              }}
+              className="group block rounded-lg px-3 py-2.5 hover:bg-[#ff6a3d]/10"
+            >
               <p className="font-mono text-[12px] text-[#5b5f6d]">
                 {p.date}, {p.minutes} min
               </p>

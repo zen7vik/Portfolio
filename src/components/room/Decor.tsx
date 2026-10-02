@@ -50,7 +50,12 @@ export function Bookshelf({ posts, onRide }: { posts: RoomData['posts']; onRide:
             pulled={out === i}
             onClick={() => {
               setOut(out === i ? null : i)
-              say('shelf', p.title, 7000, { label: 'Read it', href: p.href, external: p.external })
+              say('shelf', p.title, 7000, {
+                label: 'Read it',
+                href: p.href,
+                external: p.external,
+                read: p.external ? undefined : { kind: 'post', id: p.id },
+              })
             }}
           />
         )

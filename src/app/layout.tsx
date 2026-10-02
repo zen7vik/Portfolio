@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist_Mono, Mona_Sans } from 'next/font/google'
-import SmoothScroll from '@/components/providers/SmoothScroll'
 import HotkeyMount from '@/components/terminal/HotkeyMount'
 import { getAllCases } from '@/lib/content'
 import { site } from '@/lib/site'
@@ -46,7 +45,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <SmoothScroll>{children}</SmoothScroll>
+        {children}
         <HotkeyMount cases={cases} />
       </body>
     </html>

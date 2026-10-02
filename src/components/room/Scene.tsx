@@ -11,6 +11,7 @@ import { C, Interactive } from '@/components/room/kit'
 import SatvikOS from '@/components/room/SatvikOS'
 import { Shell } from '@/components/room/Shell'
 import { setState, useRoom } from '@/components/room/store'
+import { openReader } from '@/components/reader/readerStore'
 import type { RoomData } from '@/components/room/types'
 
 const SCREEN = new THREE.Vector3(0.15, DESK_Y + 0.44, -2.33)
@@ -87,6 +88,11 @@ function Bubbles() {
                 href={b.link.href}
                 target={b.link.external ? '_blank' : undefined}
                 rel="noopener noreferrer"
+                onClick={(e) => {
+                  if (!b.link?.read) return
+                  e.preventDefault()
+                  openReader(b.link.read.kind, b.link.read.id)
+                }}
                 className="pointer-events-auto mt-2 block font-semibold text-[#c23a12] underline decoration-2 underline-offset-4"
               >
                 {b.link.label}

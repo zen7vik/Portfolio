@@ -4,7 +4,7 @@ import { useSyncExternalStore } from 'react'
 
 export type Focus = 'room' | 'monitor' | 'shelf' | 'board'
 
-export type BubbleLink = { label: string; href: string; external?: boolean }
+export type BubbleLink = { label: string; href: string; external?: boolean; read?: { kind: 'case' | 'post'; id: string } }
 export type Bubble = { id: string; anchor: string; text: string; until: number; link?: BubbleLink }
 
 type State = {
