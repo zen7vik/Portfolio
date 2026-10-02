@@ -9,6 +9,7 @@ import { Beanbag, Bookshelf, Cat, Corkboard, Plant, Poster, ServerRack, WallCloc
 import { Chai, DESK_Y, Desk, Lamp, Laptop, Pager } from '@/components/room/Desk'
 import { C, Interactive } from '@/components/room/kit'
 import { makeScreenTexture } from '@/components/room/screenTexture'
+import { sanitizeNormals } from '@/components/three/sanitizeNormals'
 import { Shell } from '@/components/room/Shell'
 import { setState, useRoom } from '@/components/room/store'
 import { openReader } from '@/components/reader/readerStore'
@@ -34,9 +35,12 @@ export const ANCHORS: Record<string, [number, number, number]> = {
 }
 
 function Ready() {
-  const frames = { n: 0 }
-  useFrame(() => {
-    if (++frames.n === 20) setState({ ready: true })
+  const frames = useRef(0)
+  useFrame(({ scene }) => {
+    frames.current++
+    // patch again once the late text meshes exist
+    if (frames.current === 20 || frames.current === 120) sanitizeNormals(scene)
+    if (frames.current === 20) setState({ ready: true })
   })
   return null
 }
