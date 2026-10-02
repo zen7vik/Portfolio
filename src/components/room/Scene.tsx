@@ -2,13 +2,13 @@
 
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { ContactShadows, Html, RoundedBox } from '@react-three/drei'
+import { AdaptiveDpr, ContactShadows, Html, PerformanceMonitor, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import { Avatar } from '@/components/room/Avatar'
 import { Beanbag, Bookshelf, Cat, Corkboard, Plant, Poster, ServerRack, WallClock } from '@/components/room/Decor'
 import { Chai, DESK_Y, Desk, Lamp, Laptop, Pager } from '@/components/room/Desk'
 import { C, Interactive } from '@/components/room/kit'
-import SatvikOS from '@/components/room/SatvikOS'
+import { makeScreenTexture } from '@/components/room/screenTexture'
 import { Shell } from '@/components/room/Shell'
 import { setState, useRoom } from '@/components/room/store'
 import { openReader } from '@/components/reader/readerStore'
@@ -51,6 +51,16 @@ function Rig({ narrow }: { narrow: boolean }) {
   useFrame(({ pointer }, dt) => {
     const cam = camera as THREE.PerspectiveCamera
     const k = 1 - Math.exp(-dt * 3.2)
+    const dbg = process.env.NODE_ENV !== 'production' && typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('cam') : null
+    if (dbg === 'front' || dbg === 'back') {
+      // dev-only close-ups of the character
+      pos.set(dbg === 'front' ? 0.15 : 0.6, 1.35, dbg === 'front' ? -2.0 : -0.4)
+      look.set(0.15, 1.15, -1.32)
+      cam.position.copy(pos)
+      target.copy(look)
+      cam.lookAt(target)
+      return
+    }
     if (focus === 'monitor' && !narrow) {
       const half = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2))
       const d = 1.1 * Math.max(0.68 / (2 * half), 1.12 / (2 * half * (size.width / size.height)))
@@ -105,9 +115,21 @@ function Bubbles() {
   )
 }
 
-function Monitor({ data, onRide }: { data: RoomData; onRide: () => void }) {
+function Monitor() {
   const focus = useRoom((s) => s.focus)
   const active = focus === 'monitor'
+  const { tex, draw } = useMemo(() => makeScreenTexture(), [])
+  useEffect(() => {
+    document.fonts?.ready.then(() => draw())
+    let on = false
+    const id = setInterval(() => {
+      on = !on
+      draw(on ? 1 : 0)
+    }, 700)
+    return () => clearInterval(id)
+  }, [draw])
+  useEffect(() => () => tex.dispose(), [tex])
+
   return (
     <group position={[0.15, DESK_Y + 0.03, -2.36]}>
       <mesh position={[0, 0.01, 0.05]} castShadow>
@@ -122,18 +144,10 @@ function Monitor({ data, onRide }: { data: RoomData; onRide: () => void }) {
         <RoundedBox args={[1.12, 0.7, 0.045]} radius={0.02} position={[0, 0.41, 0]} castShadow>
           <meshStandardMaterial color={C.ink} roughness={0.5} />
         </RoundedBox>
-        <Html
-          transform
-          occlude="blending"
-          distanceFactor={0.4}
-          position={[0, 0.41, 0.0235]}
-          zIndexRange={[50, 0]}
-          pointerEvents={active ? 'auto' : 'none'}
-        >
-          <div style={{ pointerEvents: active ? 'auto' : 'none' }}>
-            <SatvikOS data={data} onExit={() => setState({ focus: 'room' })} onRide={onRide} />
-          </div>
-        </Html>
+        <mesh position={[0, 0.41, 0.0235]}>
+          <planeGeometry args={[1.04, 0.624]} />
+          <meshBasicMaterial map={tex} toneMapped={false} />
+        </mesh>
       </Interactive>
       {/* screen glow onto the desk and the person */}
       <pointLight position={[0, 0.42, 0.35]} intensity={2.6} distance={2.4} color="#9fc3ff" />
@@ -151,7 +165,7 @@ function Lights({ night }: { night: boolean }) {
         intensity={night ? 0.9 : 2.6}
         color={night ? '#8fa4ff' : '#ffe2b5'}
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[1024, 1024]}
         shadow-camera-left={-4}
         shadow-camera-right={4}
         shadow-camera-top={4}
@@ -166,6 +180,7 @@ function Lights({ night }: { night: boolean }) {
 
 export default function Scene({ data, onRide }: { data: RoomData; onRide: () => void }) {
   const night = useRoom((s) => s.night)
+  const [dpr, setDpr] = useState(1.75)
   const [narrow, setNarrow] = useState(false)
   useEffect(() => {
     const check = () => setNarrow(window.innerWidth < 768)
@@ -176,20 +191,22 @@ export default function Scene({ data, onRide }: { data: RoomData; onRide: () => 
 
   return (
     <Canvas
-      shadows="soft"
-      dpr={[1, 2]}
+      shadows
+      dpr={dpr}
       camera={{ position: [9, 7, 9], fov: 32, near: 0.05, far: 60 }}
-      gl={{ antialias: true, alpha: true }}
+      gl={{ antialias: true, powerPreference: 'high-performance' }}
       onPointerMissed={() => document.body.style.removeProperty('cursor')}
     >
       <color attach="background" args={[night ? '#141726' : '#efe3d2']} />
       <fog attach="fog" args={[night ? '#141726' : '#efe3d2', 20, 40]} />
+      <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(1.75)} flipflops={3} onFallback={() => setDpr(1)} />
+      <AdaptiveDpr pixelated={false} />
       <Rig narrow={narrow} />
       <Lights night={night} />
       <Suspense fallback={null}>
         <Shell night={night} />
         <Desk />
-        <Monitor data={data} onRide={onRide} />
+        <Monitor />
         <Lamp />
         <Chai />
         <Pager />
@@ -204,7 +221,7 @@ export default function Scene({ data, onRide }: { data: RoomData; onRide: () => 
         <Beanbag>
           <Cat />
         </Beanbag>
-        <ContactShadows position={[0, 0.012, 0]} opacity={0.35} scale={6} blur={2.4} far={2} />
+        <ContactShadows position={[0, 0.012, 0]} opacity={0.3} scale={6} blur={2.4} far={2} frames={1} resolution={512} />
         <Bubbles />
         <Ready />
       </Suspense>

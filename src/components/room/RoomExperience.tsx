@@ -13,6 +13,29 @@ import SatvikOS from '@/components/room/SatvikOS'
 import { setState, useRoom } from '@/components/room/store'
 import type { RoomData } from '@/components/room/types'
 
+function DesktopOS({ data, onRide }: { data: RoomData; onRide: () => void }) {
+  const [scale, setScale] = useState(1)
+  useEffect(() => {
+    const fit = () => setScale(Math.min((window.innerWidth * 0.9) / 1044, (window.innerHeight * 0.86) / 636, 1.25))
+    fit()
+    window.addEventListener('resize', fit)
+    return () => window.removeEventListener('resize', fit)
+  }, [])
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center" onClick={() => setState({ focus: 'room' })}>
+      <div
+        className="origin-center animate-[os-open_0.5s_cubic-bezier(0.2,1,0.3,1)_0.35s_both] rounded-[18px] bg-[#1f2230] p-3 shadow-[0_40px_120px_rgba(0,0,0,0.6)]"
+        style={{ transform: `scale(${scale})` }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="overflow-hidden rounded-[8px]">
+          <SatvikOS data={data} onExit={() => setState({ focus: 'room' })} onRide={onRide} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const Scene = dynamic(() => import('@/components/room/Scene'), { ssr: false, loading: () => null })
 
 function Loader() {
@@ -106,6 +129,8 @@ export default function RoomExperience({ data }: { data: RoomData }) {
       >
         Click anything. Everything in here does something.
       </div>
+
+      {!narrow && focus === 'monitor' && <DesktopOS data={data} onRide={ride} />}
 
       {/* phones get the OS as a full screen app instead of a tiny 3D monitor */}
       {narrow && focus === 'monitor' && (

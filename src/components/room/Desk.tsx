@@ -46,7 +46,6 @@ export function Desk() {
         <planeGeometry args={[0.3, 0.24]} />
         <meshStandardMaterial color={C.slate} />
       </mesh>
-      <Chair />
     </group>
   )
 }
@@ -75,27 +74,6 @@ function Keyboard() {
         <boxGeometry args={[0.036, 0.014, 0.032]} />
         <meshStandardMaterial color="#fbf7f0" />
       </instancedMesh>
-    </group>
-  )
-}
-
-function Chair() {
-  return (
-    <group position={[0.15, 0, -1.08]}>
-      <mesh position={[0, 0.06, 0]} castShadow>
-        <cylinderGeometry args={[0.28, 0.3, 0.04, 5]} />
-        <meshStandardMaterial color={C.ink} />
-      </mesh>
-      <mesh position={[0, 0.27, 0]}>
-        <cylinderGeometry args={[0.03, 0.03, 0.4, 8]} />
-        <meshStandardMaterial color="#888" metalness={0.6} roughness={0.3} />
-      </mesh>
-      <RoundedBox args={[0.5, 0.08, 0.48]} radius={0.04} position={[0, 0.5, 0]} castShadow>
-        <meshStandardMaterial color={C.slate} />
-      </RoundedBox>
-      <RoundedBox args={[0.48, 0.62, 0.08]} radius={0.04} position={[0, 0.85, 0.26]} rotation={[0.1, 0, 0]} castShadow>
-        <meshStandardMaterial color={C.slate} />
-      </RoundedBox>
     </group>
   )
 }
@@ -155,7 +133,7 @@ export function Lamp() {
         distance={3.5}
         color="#ffb86b"
         castShadow
-        shadow-mapSize={[1024, 1024]}
+        shadow-mapSize={[512, 512]}
         shadow-bias={-0.0004}
       />
     </group>

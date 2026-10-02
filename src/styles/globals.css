@@ -393,3 +393,16 @@ body {
   border-top: 1px solid rgb(27 29 36 / 0.12);
   margin: 2.4rem 0;
 }
+
+@keyframes os-open {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
