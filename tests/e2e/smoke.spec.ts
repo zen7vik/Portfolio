@@ -59,3 +59,32 @@ test('404 page renders in theme', async ({ page }) => {
   await page.goto('/work/does-not-exist')
   await expect(page.getByText('This page is down. The rest is fine.')).toBeVisible()
 })
+
+test('read mode pages share a header and go back to the right section', async ({ page }) => {
+  await page.goto('/work/risk-engine')
+  await expect(page.getByRole('link', { name: 'All work' })).toHaveAttribute('href', '/read#work')
+  await page.goto('/writing/f3181cdeb970')
+  await expect(page.getByRole('link', { name: 'All writing' })).toHaveAttribute('href', '/read#writing')
+  await page.goto('/read')
+  await expect(page.getByRole('button', { name: 'Toggle color theme' })).toBeVisible()
+})
+
+test('theme toggle flips read mode and is remembered', async ({ page }) => {
+  await page.goto('/read')
+  const before = await page.evaluate(() => document.documentElement.dataset.theme)
+  await page.getByRole('button', { name: 'Toggle color theme' }).click()
+  const after = await page.evaluate(() => document.documentElement.dataset.theme)
+  expect(after).not.toBe(before)
+  await page.reload()
+  expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe(after)
+})
+
+test('palette inside the room opens a case in the reader, not a new page', async ({ page }) => {
+  await page.goto('/')
+  await page.waitForTimeout(1500)
+  await page.keyboard.press('ControlOrMeta+k')
+  await page.getByRole('textbox', { name: 'Palette search' }).fill('risk')
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('dialog', { name: /risk-scoring engine/i })).toBeVisible({ timeout: 10_000 })
+  expect(new URL(page.url()).pathname).toBe('/')
+})

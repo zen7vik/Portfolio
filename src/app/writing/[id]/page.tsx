@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
-import SubNav from '@/components/ui/SubNav'
+import ReadHeader from '@/components/ui/ReadHeader'
 import { getPosts } from '@/lib/medium'
 
 export const revalidate = 86400
@@ -28,7 +28,7 @@ export default async function WritingPage({ params }: PageProps<'/writing/[id]'>
 
   return (
     <>
-      <SubNav back="/" label="Writing" />
+      <ReadHeader back={{ href: '/read#writing', label: 'All writing' }} progress />
       <main>
         <article className="mx-auto max-w-[44rem] px-5 pb-24 pt-16 md:pt-24">
           <p className="text-[0.95rem] text-fg-2">

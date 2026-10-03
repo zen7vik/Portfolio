@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { openInWorld } from '@/components/reader/openInWorld'
 import { runCommand } from '@/components/terminal/commands'
 
 type HistoryEntry = { prompt?: string; lines: string[] }
@@ -46,7 +47,7 @@ export default function Terminal({
     if (result.action?.type === 'navigate') {
       setTimeout(() => {
         onClose()
-        router.push(result.action!.href)
+        if (!openInWorld(result.action!.href)) router.push(result.action!.href)
       }, 350)
     } else if (result.action?.type === 'download') {
       const a = document.createElement('a')

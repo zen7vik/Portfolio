@@ -14,6 +14,7 @@ import {
   type Icon,
 } from '@phosphor-icons/react'
 import { runCommand } from '@/components/terminal/commands'
+import { openInWorld } from '@/components/reader/openInWorld'
 import { openReader } from '@/components/reader/readerStore'
 import { blip } from '@/components/room/sound'
 import type { RoomData } from '@/components/room/types'
@@ -396,7 +397,7 @@ function MiniTerminal({ cases }: { cases: RoomData['cases'] }) {
             if (input.trim() === 'clear') setLines([])
             else setLines((ls) => [...ls, `$ ${input}`, ...res.lines])
             setInput('')
-            if (res.action?.type === 'navigate') window.location.href = res.action.href
+            if (res.action?.type === 'navigate' && !openInWorld(res.action.href)) window.location.href = res.action.href
             if (res.action?.type === 'download') window.open(res.action.href, '_blank')
           }}
           className="flex-1 bg-transparent outline-none"

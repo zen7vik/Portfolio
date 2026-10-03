@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from '@phosphor-icons/react/dist/ssr'
 import Reveal from '@/components/ui/Reveal'
 import SplitWords from '@/components/ui/SplitWords'
-import SubNav from '@/components/ui/SubNav'
+import ReadHeader from '@/components/ui/ReadHeader'
 import type { CaseMeta } from '@/lib/content'
 
 export default function CaseLayout({
@@ -18,9 +18,9 @@ export default function CaseLayout({
 }) {
   return (
     <>
-      <SubNav back="/" label="Case study" />
+      <ReadHeader back={{ href: '/read#work', label: 'All work' }} progress />
       <main>
-        <header className="mx-auto max-w-[1320px] px-5 pb-14 pt-16 md:px-10 md:pt-24">
+        <header className="mx-auto max-w-[1180px] px-5 pb-14 pt-16 md:px-8 md:pt-24">
           <Reveal immediate>
             <p className="text-[0.95rem] text-fg-2">
               {meta.role}, {meta.period}
@@ -53,12 +53,12 @@ export default function CaseLayout({
           </Reveal>
         </header>
 
-        <article className="mx-auto max-w-[1320px] px-5 pb-24 md:px-10">{children}</article>
+        <article className="mx-auto max-w-[1180px] px-5 pb-24 md:px-8">{children}</article>
 
         <footer className="border-t border-line">
-          <div className="mx-auto grid max-w-[1320px] gap-px md:grid-cols-2">
+          <div className="mx-auto grid max-w-[1180px] gap-px md:grid-cols-2">
             {prev ? (
-              <Link href={`/work/${prev.slug}`} className="group px-5 py-12 md:px-10">
+              <Link href={`/work/${prev.slug}`} className="group px-5 py-12 md:px-8">
                 <span className="inline-flex items-center gap-2 text-sm text-muted">
                   <ArrowLeft size={14} /> Previous
                 </span>
@@ -70,7 +70,7 @@ export default function CaseLayout({
               <span />
             )}
             {next ? (
-              <Link href={`/work/${next.slug}`} className="group px-5 py-12 text-right md:border-l md:border-line md:px-10">
+              <Link href={`/work/${next.slug}`} className="group px-5 py-12 text-right md:border-l md:border-line md:px-8">
                 <span className="inline-flex items-center gap-2 text-sm text-muted">
                   Next <ArrowRight size={14} />
                 </span>

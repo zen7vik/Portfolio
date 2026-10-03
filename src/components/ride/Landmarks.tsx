@@ -408,7 +408,7 @@ function Ring({ def }: { def: LandmarkDef }) {
 const MONA = '/fonts/Mona-Sans-wght-800.ttf'
 
 const SIGN_TEXT: Record<LandmarkId, { title: string; sub: string }> = {
-  tower: { title: 'Safe Security', sub: 'Where I work: 5 systems' },
+  tower: { title: 'Safe Security', sub: 'Where I work' },
   paisabazaar: { title: 'Paisabazaar', sub: 'My first job' },
   nit: { title: 'NIT Meghalaya', sub: 'Where I studied' },
   investiq: { title: 'InvestIQ', sub: 'My trading app' },
@@ -421,6 +421,7 @@ const SIGN_TEXT: Record<LandmarkId, { title: string; sub: string }> = {
 function FacadeSign({ id, color, position, width = 4.4 }: { id: LandmarkId; color: string; position: [number, number, number]; width?: number }) {
   const visited = useRide((s) => s.visited.includes(id))
   const t = SIGN_TEXT[id]
+  const sub = visited ? 'Visited' : `${t.sub}. Drive into the ring`
   return (
     <group position={position}>
       <RoundedBox args={[width + 0.2, 1.3, 0.1]} radius={0.16} smoothness={3} position={[0.06, -0.07, -0.06]}>
@@ -429,36 +430,12 @@ function FacadeSign({ id, color, position, width = 4.4 }: { id: LandmarkId; colo
       <RoundedBox args={[width, 1.2, 0.14]} radius={0.16} smoothness={3}>
         <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.35} roughness={0.55} />
       </RoundedBox>
-      <Text font={MONA} fontSize={0.56} color="#ffffff" anchorX="center" anchorY="middle" position={[0, 0.16, 0.09]} maxWidth={width - 0.3}>
+      {/* single line each, shrunk to fit, so title and tagline can never collide */}
+      <Text font={MONA} fontSize={Math.min(0.56, (width - 0.4) / (t.title.length * 0.62))} color="#ffffff" anchorX="center" anchorY="middle" position={[0, 0.16, 0.09]} whiteSpace="nowrap">
         {t.title}
       </Text>
-      <Text font={MONA} fontSize={0.24} color="#ffffff" fillOpacity={0.92} anchorX="center" anchorY="middle" position={[0, -0.33, 0.09]}>
-        {visited ? 'Visited' : t.sub}
-      </Text>
-    </group>
-  )
-}
-
-/** Roadside board next to each ring, readable from the road. */
-function RoadSign({ def }: { def: LandmarkDef }) {
-  const [x, z] = polar(def.angle + 6.5, 27.2)
-  const t = SIGN_TEXT[def.id]
-  return (
-    <group position={[x, 0, z]} rotation={[0, (-def.angle * Math.PI) / 180, 0]}>
-      {[-1.25, 1.25].map((px) => (
-        <mesh key={px} position={[px, 0.8, -0.05]} castShadow>
-          <cylinderGeometry args={[0.07, 0.07, 1.6, 6]} />
-          <meshStandardMaterial color={C.slate} />
-        </mesh>
-      ))}
-      <RoundedBox args={[3.1, 1.15, 0.12]} radius={0.12} smoothness={3} position={[0, 1.95, 0]} castShadow>
-        <meshStandardMaterial color={def.color} roughness={0.6} />
-      </RoundedBox>
-      <Text font={MONA} fontSize={0.42} color="#ffffff" anchorX="center" anchorY="middle" position={[0, 2.12, 0.08]} maxWidth={2.9}>
-        {t.title}
-      </Text>
-      <Text font={MONA} fontSize={0.22} color="#ffffff" anchorX="center" anchorY="middle" position={[0, 1.72, 0.08]}>
-        Drive into the ring
+      <Text font={MONA} fontSize={Math.min(0.22, (width - 0.4) / (sub.length * 0.6))} color="#ffffff" fillOpacity={0.92} anchorX="center" anchorY="middle" position={[0, -0.33, 0.09]} whiteSpace="nowrap">
+        {sub}
       </Text>
     </group>
   )
@@ -496,7 +473,6 @@ export default function Landmarks() {
                 {l.id === 'nit' && <Hills />}
               </group>
             </RigidBody>
-            <RoadSign def={l} />
             <Ring def={l} />
           </group>
         )

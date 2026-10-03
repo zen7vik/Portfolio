@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { openInWorld } from '@/components/reader/openInWorld'
 import { site } from '@/lib/site'
 
 type PaletteItem = {
@@ -27,18 +28,20 @@ export default function CommandPalette({
   const items = useMemo<PaletteItem[]>(() => {
     const nav = (href: string) => () => {
       onClose()
-      router.push(href)
+      if (!openInWorld(href)) router.push(href)
     }
     const ext = (href: string) => () => {
       onClose()
       window.open(href, '_blank', 'noopener')
     }
     return [
-      { label: 'Work', group: 'Go to', run: nav('/#work') },
-      { label: 'Experience', group: 'Go to', run: nav('/#experience') },
-      { label: 'Projects', group: 'Go to', run: nav('/#projects') },
-      { label: 'Writing', group: 'Go to', run: nav('/#writing') },
-      { label: 'Contact', group: 'Go to', run: nav('/#contact') },
+      { label: 'My room', group: 'Go to', run: nav('/') },
+      { label: 'Drive around Delhi', group: 'Go to', run: nav('/ride') },
+      { label: 'Work', group: 'Go to', run: nav('/read#work') },
+      { label: 'Experience', group: 'Go to', run: nav('/read#experience') },
+      { label: 'Projects', group: 'Go to', run: nav('/read#projects') },
+      { label: 'Writing', group: 'Go to', run: nav('/read#writing') },
+      { label: 'Contact', group: 'Go to', run: nav('/read#contact') },
       ...cases.map((c) => ({ label: c.title, group: 'Case studies', run: nav(`/work/${c.slug}`) })),
       {
         label: 'Download resume',

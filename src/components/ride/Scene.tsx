@@ -162,14 +162,17 @@ function FollowCamera({ far }: { far: boolean }) {
     camera.lookAt(look)
 
     for (const o of occluders) {
-      const target = blocking(o, camera.position) ? 0.22 : 1
-      if (Math.abs(o.opacity - target) < 0.005) continue
+      // fade fully out: a half-faded building reads as ghost rectangles over the grass
+      const target = blocking(o, camera.position) ? 0 : 1
+      if (Math.abs(o.opacity - target) < 0.005 && (target > 0 || o.opacity === 0)) continue
       o.opacity = THREE.MathUtils.damp(o.opacity, target, 8, dt)
+      if (target === 0 && o.opacity < 0.03) o.opacity = 0
       const solid = o.opacity > 0.98
       const flipped = solid !== o.solid
       o.solid = solid
       for (const m of o.mats) {
         m.opacity = solid ? 1 : o.opacity
+        m.visible = o.opacity > 0
         if (!flipped) continue
         // three bakes OPAQUE into the shader, so the switch needs a recompile, once per flip
         m.transparent = !solid
