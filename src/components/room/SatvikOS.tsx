@@ -163,7 +163,7 @@ function Window({
 }) {
   const drag = useRef<{ dx: number; dy: number } | null>(null)
   const style = full
-    ? { left: 8, right: 8, top: 44 + (win.z % 3) * 8, bottom: 8, zIndex: win.z }
+    ? { left: 8, right: 8, top: 44, bottom: 8, zIndex: win.z }
     : { left: win.x, top: win.y, width: 560, height: 420, zIndex: win.z }
 
   return (

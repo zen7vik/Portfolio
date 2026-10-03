@@ -88,3 +88,18 @@ test('palette inside the room opens a case in the reader, not a new page', async
   await expect(page.getByRole('dialog', { name: /risk-scoring engine/i })).toBeVisible({ timeout: 10_000 })
   expect(new URL(page.url()).pathname).toBe('/')
 })
+
+test('on a phone, SatvikOS windows open from the desktop and close again', async ({ browser }) => {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
+  await page.goto('/')
+  await expect(page.getByText('Brewing chai, waking the cat...')).toBeHidden({ timeout: 30_000 })
+  await page.mouse.click(195, 330)
+  const work = page.getByRole('button', { name: 'Work', exact: true })
+  if (!(await work.isVisible().catch(() => false))) test.skip(true, 'monitor not at this point in software rendering')
+  await work.click()
+  const close = page.getByRole('button', { name: 'Close window' })
+  await expect(close).toHaveCount(1)
+  await close.click()
+  await expect(close).toHaveCount(0)
+  await page.close()
+})
