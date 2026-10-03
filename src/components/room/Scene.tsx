@@ -152,8 +152,15 @@ function BubbleProjector() {
       const a = ANCHORS[b.anchor] ?? [0, 2, 0]
       v.set(a[0], a[1], a[2]).project(camera)
       const behind = v.z > 1
-      const x = (v.x * 0.5 + 0.5) * size.width
-      const y = (-v.y * 0.5 + 0.5) * size.height
+      let x = (v.x * 0.5 + 0.5) * size.width
+      let y = (-v.y * 0.5 + 0.5) * size.height
+      // keep the whole bubble on screen: it is centred on x and sits above y
+      const box = el.firstElementChild as HTMLElement | null
+      if (box) {
+        const half = box.offsetWidth / 2 + 10
+        x = Math.min(Math.max(x, half), size.width - half)
+        y = Math.max(y, box.offsetHeight + 10)
+      }
       el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`
       el.style.visibility = behind ? 'hidden' : 'visible'
     }

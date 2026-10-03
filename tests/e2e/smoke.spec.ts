@@ -103,3 +103,18 @@ test('on a phone, SatvikOS windows open from the desktop and close again', async
   await expect(close).toHaveCount(0)
   await page.close()
 })
+
+test('on a phone, speech bubbles stay fully on screen', async ({ browser }) => {
+  const page = await browser.newPage({ viewport: { width: 432, height: 768 } })
+  await page.goto('/')
+  await expect(page.getByText('Brewing chai, waking the cat...')).toBeHidden({ timeout: 30_000 })
+  await page.waitForTimeout(6500) // let the greeting finish
+  await page.mouse.click(357, 226) // the kind words board, near the right edge; its quotes are long
+  const bubble = page.getByText(/" said /)
+  await expect(bubble).toBeVisible({ timeout: 5_000 })
+  await page.waitForTimeout(500)
+  const box = await bubble.boundingBox()
+  expect(box!.x).toBeGreaterThanOrEqual(0)
+  expect(box!.x + box!.width).toBeLessThanOrEqual(432)
+  await page.close()
+})
