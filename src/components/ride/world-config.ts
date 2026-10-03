@@ -43,5 +43,5 @@ export function polar(angleDeg: number, r: number): [number, number] {
 export const SKY: Record<TimeOfDay, { bg: string; fog: string; sun: string; sunI: number; hemiSky: string; hemiGround: string; hemiI: number; water: string; lampsOn: boolean }> = {
   day: { bg: '#a5dcf2', fog: '#bfe6f5', sun: '#fff1d6', sunI: 2.6, hemiSky: '#d7f0ff', hemiGround: '#a7c957', hemiI: 1.1, water: '#4fb6cf', lampsOn: false },
   dusk: { bg: '#f6b27a', fog: '#f3c39a', sun: '#ff9a5c', sunI: 2.1, hemiSky: '#ffd6b0', hemiGround: '#8a6a52', hemiI: 0.9, water: '#3f8fa8', lampsOn: true },
-  night: { bg: '#162040', fog: '#1a2546', sun: '#a9bcff', sunI: 1.1, hemiSky: '#5a6fb0', hemiGround: '#2a2f45', hemiI: 1.05, water: '#1b3350', lampsOn: true },
+  night: { bg: '#162040', fog: '#1a2546', sun: '#a9bcff', sunI: 1.1, hemiSky: '#6b80c4', hemiGround: '#343a55', hemiI: 1.35, water: '#1b3350', lampsOn: true },
 }

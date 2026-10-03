@@ -38,10 +38,79 @@ function blocks(cam: THREE.Vector3) {
   return occluders.some((o) => blocking(o, cam))
 }
 
+// user camera input: drag to orbit, wheel or pinch to zoom; eases back behind the auto while driving
+const orbit = { yaw: 0, pitch: 0, zoom: 1, last: -1e9, dragging: false }
+const pointers = new Map<number, { x: number; y: number }>()
+let pinchStart = 0
+let zoomStart = 1
+
+function useOrbitInput(el: HTMLElement) {
+  useEffect(() => {
+    const now = () => performance.now()
+    const down = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+      el.setPointerCapture?.(e.pointerId)
+      orbit.dragging = true
+      orbit.last = now()
+      if (pointers.size === 2) {
+        const [a, b] = [...pointers.values()]
+        pinchStart = Math.hypot(a.x - b.x, a.y - b.y)
+        zoomStart = orbit.zoom
+      }
+    }
+    const move = (e: PointerEvent) => {
+      const prev = pointers.get(e.pointerId)
+      if (!prev) return
+      const dx = e.clientX - prev.x
+      const dy = e.clientY - prev.y
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+      orbit.last = now()
+      if (pointers.size >= 2) {
+        const [a, b] = [...pointers.values()]
+        const d = Math.hypot(a.x - b.x, a.y - b.y)
+        if (pinchStart > 0) orbit.zoom = THREE.MathUtils.clamp(zoomStart * (pinchStart / d), 0.6, 1.8)
+        return
+      }
+      orbit.yaw -= dx * 0.0065
+      orbit.pitch = THREE.MathUtils.clamp(orbit.pitch + dy * 0.004, -0.3, 0.6)
+    }
+    const up = (e: PointerEvent) => {
+      pointers.delete(e.pointerId)
+      if (pointers.size < 2) pinchStart = 0
+      if (pointers.size === 0) orbit.dragging = false
+      orbit.last = now()
+    }
+    const wheel = (e: WheelEvent) => {
+      e.preventDefault()
+      orbit.zoom = THREE.MathUtils.clamp(orbit.zoom * (1 + e.deltaY * 0.0011), 0.6, 1.8)
+      orbit.last = now()
+    }
+    el.addEventListener('pointerdown', down)
+    el.addEventListener('pointermove', move)
+    el.addEventListener('pointerup', up)
+    el.addEventListener('pointercancel', up)
+    el.addEventListener('wheel', wheel, { passive: false })
+    return () => {
+      el.removeEventListener('pointerdown', down)
+      el.removeEventListener('pointermove', move)
+      el.removeEventListener('pointerup', up)
+      el.removeEventListener('pointercancel', up)
+      el.removeEventListener('wheel', wheel)
+      pointers.clear()
+      orbit.yaw = 0
+      orbit.pitch = 0
+      orbit.zoom = 1
+      orbit.dragging = false
+    }
+  }, [el])
+}
+
 function FollowCamera({ far }: { far: boolean }) {
-  const { camera } = useThree()
+  const { camera, gl } = useThree()
   const yaw = useRef(0)
   const first = useRef(true)
+  useOrbitInput(gl.domElement)
 
   useEffect(() => {
     const cam = camera as THREE.PerspectiveCamera
@@ -55,11 +124,25 @@ function FollowCamera({ far }: { far: boolean }) {
     d = Math.atan2(Math.sin(d), Math.cos(d))
     yaw.current += d * (1 - Math.exp(-2.6 * dt))
 
-    const dist = far ? 12.5 : 9.5
-    const height = far ? 7.5 : 5.6
+    // after a moment without input, a moving auto pulls the view back behind it
+    if (!orbit.dragging && performance.now() - orbit.last > 2500 && Math.abs(autoPose.speed) > 1.2) {
+      orbit.yaw = Math.atan2(Math.sin(orbit.yaw), Math.cos(orbit.yaw))
+      orbit.yaw = THREE.MathUtils.damp(orbit.yaw, 0, 2.2, dt)
+      orbit.pitch = THREE.MathUtils.damp(orbit.pitch, 0, 2.2, dt)
+    }
+
+    const dist0 = far ? 12.5 : 9.5
+    const height0 = far ? 7.5 : 5.6
+    const elev = THREE.MathUtils.clamp(Math.atan2(height0, dist0) + orbit.pitch, 0.14, 1.25)
+    const radius = Math.hypot(height0, dist0) * orbit.zoom
+    const dist = Math.cos(elev) * radius
+    const height = Math.sin(elev) * radius
     const ground = Math.max(autoPose.y, 0)
-    back.set(Math.sin(yaw.current), 0, Math.cos(yaw.current))
-    lookTarget.set(autoPose.x - back.x * 3, ground + 1, autoPose.z - back.z * 3)
+    // look a little ahead of the auto when following, straight at it while orbiting
+    const ahead = 3 * Math.max(0, 1 - Math.abs(orbit.yaw) * 1.5)
+    lookTarget.set(autoPose.x - Math.sin(yaw.current) * ahead, ground + 1, autoPose.z - Math.cos(yaw.current) * ahead)
+    const view = yaw.current + orbit.yaw
+    back.set(Math.sin(view), 0, Math.cos(view))
 
     // rise a little over low buildings; anything still in the way fades out below
     origin.set(autoPose.x, ground + 1.6, autoPose.z)
@@ -74,7 +157,7 @@ function FollowCamera({ far }: { far: boolean }) {
       look.copy(lookTarget)
       first.current = false
     }
-    camera.position.lerp(camTarget, 1 - Math.exp(-5 * dt))
+    camera.position.lerp(camTarget, 1 - Math.exp(-(orbit.dragging ? 12 : 5) * dt))
     look.lerp(lookTarget, 1 - Math.exp(-6 * dt))
     camera.lookAt(look)
 

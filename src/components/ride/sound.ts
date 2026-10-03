@@ -54,4 +54,8 @@ export const sfx = {
   splash() {
     tone(300, 0, 0.5, 'triangle', 0.12, 60)
   },
+  arrive() {
+    // a bright little arpeggio for the first visit to a landmark
+    ;[523, 659, 784, 1046].forEach((f, i) => tone(f, i * 0.07, 0.18, 'triangle', 0.08))
+  },
 }

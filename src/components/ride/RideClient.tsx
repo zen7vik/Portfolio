@@ -117,6 +117,9 @@ function Hud() {
         <span>
           <kbd>R</kbd> reset
         </span>
+        <span>
+          <kbd>Drag</kbd> look around
+        </span>
         <span className="ride-hint-goal">Drive into the glowing rings. Crash into anything else.</span>
       </div>
 

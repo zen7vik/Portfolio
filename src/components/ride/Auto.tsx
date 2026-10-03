@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
-import { RoundedBox } from '@react-three/drei'
+import { Billboard, RoundedBox, Text } from '@react-three/drei'
 import { CuboidCollider, RigidBody, useBeforePhysicsStep, type RapierRigidBody } from '@react-three/rapier'
 import { isReaderOpen } from '@/components/reader/readerStore'
 import { autoPose, controls, getState, setState, toast, useRide } from '@/components/ride/store'
@@ -36,6 +36,19 @@ function Wheel({ position, wheelRef }: { position: [number, number, number]; whe
 
 const PUFFS = 10
 
+function blobTexture() {
+  const c = document.createElement('canvas')
+  c.width = c.height = 64
+  const g = c.getContext('2d')!
+  const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32)
+  grad.addColorStop(0, 'rgba(0,0,0,0.55)')
+  grad.addColorStop(0.6, 'rgba(0,0,0,0.3)')
+  grad.addColorStop(1, 'rgba(0,0,0,0)')
+  g.fillStyle = grad
+  g.fillRect(0, 0, 64, 64)
+  return new THREE.CanvasTexture(c)
+}
+
 export default function Auto() {
   const headlights = useRide((s) => s.time !== 'day')
   const lamp = useRef<THREE.SpotLight>(null)
@@ -57,6 +70,10 @@ export default function Auto() {
   const honkCd = useRef(0)
   const glow = useRef<THREE.Group>(null)
   const tail = useRef<THREE.MeshStandardMaterial>(null)
+  const blob = useRef<THREE.Mesh>(null)
+  const blobTex = useMemo(() => (typeof document === 'undefined' ? null : blobTexture()), [])
+  const pom = useRef<THREE.Group>(null)
+  const pomAge = useRef(9)
 
   const reset = () => {
     const b = body.current
@@ -195,8 +212,28 @@ export default function Auto() {
     if (controls.honk && honkCd.current <= 0) {
       honkCd.current = 0.6
       sfx.honk()
+      pomAge.current = 0
     }
     controls.honk = false
+
+    // a little "pom pom" pops above the auto on every honk, even with sound off
+    pomAge.current += dt
+    if (pom.current) {
+      const a = pomAge.current
+      pom.current.visible = a < 0.9
+      if (a < 0.9) {
+        const pop = a < 0.15 ? a / 0.15 : 1
+        pom.current.scale.setScalar(0.6 + pop * 0.4 + Math.sin(a * 30) * 0.03 * (1 - a))
+        pom.current.position.y = 2.25 + a * 0.6
+      }
+    }
+
+    if (blob.current) {
+      blob.current.position.set(t.x, 0.05, t.z)
+      blob.current.rotation.z = autoPose.yaw
+      const lift = THREE.MathUtils.clamp(t.y, 0, 2)
+      ;(blob.current.material as THREE.MeshBasicMaterial).opacity = 1 - lift * 0.4
+    }
 
     if (glow.current) glow.current.visible = getState().celebrate
     if (tail.current) {
@@ -316,6 +353,13 @@ export default function Auto() {
           intensity={headlights ? 60 : 0}
           color="#ffe8b0"
         />
+        <group ref={pom} visible={false} position={[0, 2.25, 0]}>
+          <Billboard>
+            <Text font="/fonts/Mona-Sans-wght-800.ttf" fontSize={0.42} color={C.autoYellow} outlineWidth={0.05} outlineColor={C.ink} anchorX="center" anchorY="middle">
+              pom pom!
+            </Text>
+          </Billboard>
+        </group>
         {/* easter egg: underglow after all six chais */}
         <group ref={glow} visible={false}>
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]}>
@@ -325,6 +369,11 @@ export default function Auto() {
           <pointLight color={C.accent} intensity={6} distance={4} position={[0, 0.3, 0]} />
         </group>
       </RigidBody>
+      {/* soft contact shadow right under the auto so it always looks planted */}
+      <mesh ref={blob} rotation={[-Math.PI / 2, 0, 0]} renderOrder={1}>
+        <planeGeometry args={[1.9, 2.7]} />
+        <meshBasicMaterial map={blobTex} transparent depthWrite={false} polygonOffset polygonOffsetFactor={-2} />
+      </mesh>
       {Array.from({ length: PUFFS }, (_, i) => (
         <mesh key={i} ref={(m) => m && (puffs.current[i] = m)} visible={false}>
           <icosahedronGeometry args={[1, 1]} />
