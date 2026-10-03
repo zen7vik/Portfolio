@@ -92,16 +92,48 @@ function House({ position, rot, color }: { position: [number, number, number]; r
   )
 }
 
+function poolTexture() {
+  const c = document.createElement('canvas')
+  c.width = c.height = 128
+  const g = c.getContext('2d')!
+  const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64)
+  grad.addColorStop(0, 'rgba(255,214,150,0.9)')
+  grad.addColorStop(0.45, 'rgba(255,196,120,0.35)')
+  grad.addColorStop(1, 'rgba(255,190,110,0)')
+  g.fillStyle = grad
+  g.fillRect(0, 0, 128, 128)
+  const t = new THREE.CanvasTexture(c)
+  t.colorSpace = THREE.SRGBColorSpace
+  return t
+}
+
+/** Street lamps on the inner verge, each arm reaching over the road so the light lands on the lane. */
 function LampPosts({ spots, on }: { spots: [number, number][]; on: boolean }) {
   const posts = useRef<THREE.InstancedMesh>(null)
+  const arms = useRef<THREE.InstancedMesh>(null)
   const heads = useRef<THREE.InstancedMesh>(null)
+  const pools = useRef<THREE.InstancedMesh>(null)
+  const tex = useMemo(() => (typeof document === 'undefined' ? null : poolTexture()), [])
   useLayoutEffect(() => {
     const m = new THREE.Matrix4()
+    const o = new THREE.Object3D()
     spots.forEach(([x, z], i) => {
+      const r = Math.hypot(x, z)
+      const ux = x / r
+      const uz = z / r
+      const heading = Math.atan2(ux, uz)
       posts.current?.setMatrixAt(i, m.makeTranslation(x, 1.4, z))
-      heads.current?.setMatrixAt(i, m.makeTranslation(x, 2.85, z))
+      o.position.set(x + ux * 0.65, 2.78, z + uz * 0.65)
+      o.rotation.set(0, heading, 0)
+      o.updateMatrix()
+      arms.current?.setMatrixAt(i, o.matrix)
+      heads.current?.setMatrixAt(i, m.makeTranslation(x + ux * 1.3, 2.68, z + uz * 1.3))
+      o.position.set(x + ux * 1.6, 0.03, z + uz * 1.6)
+      o.rotation.set(-Math.PI / 2, 0, 0)
+      o.updateMatrix()
+      pools.current?.setMatrixAt(i, o.matrix)
     })
-    for (const r of [posts, heads]) {
+    for (const r of [posts, arms, heads, pools]) {
       if (!r.current) continue
       r.current.instanceMatrix.needsUpdate = true
       r.current.computeBoundingSphere()
@@ -113,9 +145,17 @@ function LampPosts({ spots, on }: { spots: [number, number][]; on: boolean }) {
         <cylinderGeometry args={[0.06, 0.08, 2.8, 6]} />
         <meshStandardMaterial color={C.slate} roughness={0.6} />
       </instancedMesh>
+      <instancedMesh ref={arms} args={[undefined, undefined, spots.length]}>
+        <boxGeometry args={[0.07, 0.07, 1.4]} />
+        <meshStandardMaterial color={C.slate} roughness={0.6} />
+      </instancedMesh>
       <instancedMesh ref={heads} args={[undefined, undefined, spots.length]}>
-        <sphereGeometry args={[0.2, 10, 8]} />
+        <sphereGeometry args={[0.18, 10, 8]} />
         <meshStandardMaterial color="#fff3d0" emissive="#ffc46b" emissiveIntensity={on ? 2.2 : 0} />
+      </instancedMesh>
+      <instancedMesh ref={pools} args={[undefined, undefined, spots.length]} visible={on && !!tex} renderOrder={2}>
+        <planeGeometry args={[3.4, 3.4]} />
+        <meshBasicMaterial map={tex} transparent depthWrite={false} blending={THREE.AdditiveBlending} opacity={0.75} />
       </instancedMesh>
     </>
   )
@@ -257,7 +297,8 @@ export function Sky({ mobile = false }: { mobile?: boolean }) {
   // the shadow camera follows the auto so shadows stay sharp everywhere
   useFrame(() => {
     if (!sun.current) return
-    const offset = time === 'dusk' ? [-22, 14, 10] : time === 'night' ? [12, 22, -14] : [16, 28, 12]
+    // a high sun keeps shadows under their objects instead of throwing detached slabs onto the grass
+    const offset = time === 'dusk' ? [-14, 22, 7] : time === 'night' ? [6, 30, -8] : [7, 34, 5]
     // move in whole shadow-map texels so shadow edges do not crawl while driving
     const texel = 56 / (mobile ? 1024 : 2048)
     const sx = Math.round(autoPose.x / texel) * texel

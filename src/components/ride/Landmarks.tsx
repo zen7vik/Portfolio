@@ -3,7 +3,7 @@
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
-import { Billboard, RoundedBox, Text } from '@react-three/drei'
+import { RoundedBox, Text } from '@react-three/drei'
 import { CuboidCollider, CylinderCollider, RigidBody } from '@react-three/rapier'
 import { autoPose, getState, setState, useRide, type LandmarkId } from '@/components/ride/store'
 import { sfx } from '@/components/ride/sound'
@@ -71,6 +71,7 @@ function Tower({ lit }: { lit: boolean }) {
         </RoundedBox>
       ))}
       <Windows w={5} h={8} d={4.4} rows={7} cols={4} lit={lit} y0={1} />
+      <FacadeSign id="tower" color={C.accent} position={[0, 2.85, 2.55]} width={4.5} />
       <RoundedBox args={[3.6, 3, 3.2]} radius={0.12} smoothness={4} position={[0, 10.5, 0]} castShadow>
         <meshStandardMaterial color={C.teal} roughness={0.5} />
       </RoundedBox>
@@ -127,6 +128,7 @@ function Library() {
           <meshStandardMaterial color={c} roughness={0.7} />
         </RoundedBox>
       ))}
+      <FacadeSign id="library" color={C.teal} position={[0, 4.55, 2.25]} width={4.4} />
       <CuboidCollider args={[3, 2.4, 2]} position={[0, 2.4, 0]} />
       <CuboidCollider args={[0.7, 1, 0.5]} position={[3.9, 1, 1]} />
     </group>
@@ -140,23 +142,34 @@ function Ticker() {
       [1.2, 1.5, 1.3, 1.8, 2.1, 1.9, 2.4, 2.2, 2.7, 3.0].map((v, i, a) => ({ v, up: i === 0 || v >= a[i - 1] })),
     [],
   )
+  const visited = useRide((s) => s.visited.includes('investiq'))
   const tape = useRef<THREE.Group>(null)
   useFrame(({ clock }) => {
-    if (tape.current) tape.current.position.x = 2.6 - ((clock.elapsedTime * 0.9) % 5.6)
+    // each dash wraps inside the tape so nothing slides past the board edge
+    const t = clock.elapsedTime * 0.9
+    tape.current?.children.forEach((d, i) => {
+      d.position.x = ((((i * 0.7 - t) % 5.6) + 5.6) % 5.6) - 2.8
+    })
   })
   return (
     <group>
       {[-2.6, 2.6].map((x) => (
-        <mesh key={x} position={[x, 1.6, 0]} castShadow>
-          <cylinderGeometry args={[0.12, 0.14, 3.2, 8]} />
+        <mesh key={x} position={[x, 1.1, 0]} castShadow>
+          <cylinderGeometry args={[0.12, 0.14, 2.2, 8]} />
           <meshStandardMaterial color={C.slate} />
         </mesh>
       ))}
-      <RoundedBox args={[6.4, 3.4, 0.3]} radius={0.12} position={[0, 4.6, 0]} castShadow>
+      <RoundedBox args={[6.4, 3.1, 0.3]} radius={0.12} position={[0, 3.55, 0]} castShadow>
         <meshStandardMaterial color="#1f2433" roughness={0.6} />
       </RoundedBox>
+      <Text font={MONA} fontSize={0.48} color="#ffffff" anchorX="left" anchorY="middle" position={[-2.9, 4.68, 0.17]}>
+        InvestIQ
+      </Text>
+      <Text font={MONA} fontSize={0.22} color="#8ce99a" anchorX="right" anchorY="middle" position={[2.9, 4.7, 0.17]}>
+        {visited ? 'Visited' : 'My trading app'}
+      </Text>
       {candles.map((c, i) => (
-        <group key={i} position={[-2.5 + i * 0.55, 3.3 + c.v * 0.6, 0.18]}>
+        <group key={i} position={[-2.45 + i * 0.54, 2.55 + c.v * 0.55, 0.18]}>
           <mesh>
             <boxGeometry args={[0.26, 0.42, 0.04]} />
             <meshStandardMaterial
@@ -172,23 +185,23 @@ function Ticker() {
         </group>
       ))}
       {/* scrolling tape under the chart */}
-      <group position={[0, 3.25, 0.17]}>
+      <group position={[0, 2.3, 0.17]}>
         <mesh>
-          <boxGeometry args={[6, 0.32, 0.02]} />
+          <boxGeometry args={[6.1, 0.3, 0.02]} />
           <meshStandardMaterial color="#11141d" />
         </mesh>
         <group ref={tape}>
           {Array.from({ length: 8 }, (_, i) => (
             <mesh key={i} position={[-2.8 + i * 0.7, 0, 0.02]}>
-              <boxGeometry args={[0.4, 0.1, 0.01]} />
+              <boxGeometry args={[0.36, 0.1, 0.01]} />
               <meshStandardMaterial color={C.autoYellow} emissive={C.autoYellow} emissiveIntensity={1.4} />
             </mesh>
           ))}
         </group>
       </group>
-      <CuboidCollider args={[3.2, 1.7, 0.2]} position={[0, 4.6, 0]} />
-      <CuboidCollider args={[0.15, 1.6, 0.15]} position={[-2.6, 1.6, 0]} />
-      <CuboidCollider args={[0.15, 1.6, 0.15]} position={[2.6, 1.6, 0]} />
+      <CuboidCollider args={[3.2, 1.55, 0.2]} position={[0, 3.55, 0]} />
+      <CuboidCollider args={[0.15, 1.1, 0.15]} position={[-2.6, 1.1, 0]} />
+      <CuboidCollider args={[0.15, 1.1, 0.15]} position={[2.6, 1.1, 0]} />
     </group>
   )
 }
@@ -233,9 +246,7 @@ function Office({ lit }: { lit: boolean }) {
         <meshStandardMaterial color="#dbe7f5" roughness={0.7} />
       </RoundedBox>
       <Windows w={5.6} h={4.4} d={4} rows={4} cols={5} lit={lit} y0={0.9} />
-      <RoundedBox args={[4.8, 0.8, 0.3]} radius={0.12} position={[0, 5.9, 0.6]} castShadow>
-        <meshStandardMaterial color="#1c7ed6" emissive="#1c7ed6" emissiveIntensity={lit ? 1.4 : 0.15} />
-      </RoundedBox>
+      <FacadeSign id="paisabazaar" color="#1c7ed6" position={[0, 3.8, 2.2]} width={4.8} />
       <RoundedBox args={[1.4, 1.8, 0.2]} radius={0.06} position={[0, 0.9, 2.05]}>
         <meshStandardMaterial color="#9ec5ef" roughness={0.2} />
       </RoundedBox>
@@ -285,6 +296,7 @@ function Hills() {
       <RoundedBox args={[4.2, 0.6, 0.6]} radius={0.08} position={[0, 2.8, 1.6]} castShadow>
         <meshStandardMaterial color={C.terracotta} roughness={0.8} />
       </RoundedBox>
+      <FacadeSign id="nit" color={C.grassDark} position={[0, 3.6, 1.9]} width={4.6} />
       <CylinderCollider args={[3, 3.2]} position={[0, 3, -2]} />
       <CuboidCollider args={[0.25, 1.3, 0.25]} position={[-1.6, 1.3, 1.6]} />
       <CuboidCollider args={[0.25, 1.3, 0.25]} position={[1.6, 1.3, 1.6]} />
@@ -292,14 +304,65 @@ function Hills() {
   )
 }
 
+const BURST_N = 26
+const BURST_COLORS = [C.accent, C.autoYellow, C.autoGreen, C.teal, '#4dabf7', C.warm]
+
+/** A one-off pop of paper bits the first time you reach a landmark. */
+function ArrivalBurst({ start }: { start: React.RefObject<number> }) {
+  const mesh = useRef<THREE.InstancedMesh>(null)
+  const seeds = useMemo(
+    () =>
+      Array.from({ length: BURST_N }, (_, i) => {
+        const a = (i / BURST_N) * Math.PI * 2 + (i % 3) * 0.4
+        const sp = 2.2 + ((i * 37) % 10) / 6
+        return { vx: Math.cos(a) * sp, vz: Math.sin(a) * sp, vy: 5 + ((i * 13) % 7) / 2, spin: 4 + (i % 5) }
+      }),
+    [],
+  )
+  const m = useMemo(() => new THREE.Matrix4(), [])
+  const qq = useMemo(() => new THREE.Quaternion(), [])
+  const e = useMemo(() => new THREE.Euler(), [])
+  const pos = useMemo(() => new THREE.Vector3(), [])
+  const sc = useMemo(() => new THREE.Vector3(), [])
+  useLayoutEffect(() => {
+    const c = new THREE.Color()
+    seeds.forEach((_, i) => mesh.current?.setColorAt(i, c.set(BURST_COLORS[i % BURST_COLORS.length])))
+    if (mesh.current?.instanceColor) mesh.current.instanceColor.needsUpdate = true
+  }, [seeds])
+  useFrame(({ clock }) => {
+    const g = mesh.current
+    if (!g) return
+    const age = clock.elapsedTime - (start.current ?? -10)
+    g.visible = age >= 0 && age < 1.8
+    if (!g.visible) return
+    seeds.forEach((s, i) => {
+      pos.set(s.vx * age, 1 + s.vy * age - 6 * age * age, s.vz * age)
+      e.set(age * s.spin, age * s.spin * 0.7, 0)
+      sc.setScalar(Math.max(0, 1 - age / 1.8))
+      m.compose(pos, qq.setFromEuler(e), sc)
+      g.setMatrixAt(i, m)
+    })
+    g.instanceMatrix.needsUpdate = true
+  })
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, BURST_N]} visible={false} frustumCulled={false}>
+      <boxGeometry args={[0.42, 0.04, 0.26]} />
+      <meshBasicMaterial side={THREE.DoubleSide} />
+    </instancedMesh>
+  )
+}
+
 function Ring({ def }: { def: LandmarkDef }) {
   const active = useRide((s) => s.active === def.id)
   const ring = useRef<THREE.Mesh>(null)
   const beam = useRef<THREE.Mesh>(null)
+  const burstAt = useRef(-10)
+  const clockRef = useRef(0)
   const [x, z] = polar(def.angle, 27.4)
 
   useFrame(({ clock }) => {
     const t = clock.elapsedTime
+    clockRef.current = t
     // keep the panel open until the auto is clearly away, so driving through fast still shows it
     if (active && Math.hypot(autoPose.x - x, autoPose.z - z) > 7) setState({ active: null })
     if (ring.current) {
@@ -317,10 +380,15 @@ function Ring({ def }: { def: LandmarkDef }) {
         sensor
         onIntersectionEnter={(e) => {
           if (!isAuto(e as unknown as Hit)) return
-          if (getState().active !== def.id) sfx.open()
+          const first = !getState().visited.includes(def.id)
+          if (first) {
+            burstAt.current = clockRef.current
+            sfx.arrive()
+          } else if (getState().active !== def.id) sfx.open()
           setState({ active: def.id as LandmarkId })
         }}
       />
+      <ArrivalBurst start={burstAt} />
       <mesh ref={ring} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
         <ringGeometry args={[1.55, 2, 40]} />
         <meshBasicMaterial color={def.color} transparent opacity={active ? 1 : 0.85} />
@@ -349,26 +417,25 @@ const SIGN_TEXT: Record<LandmarkId, { title: string; sub: string }> = {
 }
 
 
-/** Big name that floats above the building and always faces you. */
-function SkySign({ id, color }: { id: LandmarkId; color: string }) {
+/** Name board fixed to a building's face, turned toward the road, low enough to stay in frame. */
+function FacadeSign({ id, color, position, width = 4.4 }: { id: LandmarkId; color: string; position: [number, number, number]; width?: number }) {
   const visited = useRide((s) => s.visited.includes(id))
   const t = SIGN_TEXT[id]
-  const width = Math.max(4.4, t.title.length * 0.62 + 1.2)
   return (
-    <Billboard position={[0, 6.6, 0]} scale={0.8}>
-      <RoundedBox args={[width + 0.24, 1.84, 0.12]} radius={0.3} smoothness={3} position={[0.12, -0.12, -0.08]}>
+    <group position={position}>
+      <RoundedBox args={[width + 0.2, 1.3, 0.1]} radius={0.16} smoothness={3} position={[0.06, -0.07, -0.06]}>
         <meshBasicMaterial color="#222222" />
       </RoundedBox>
-      <RoundedBox args={[width, 1.7, 0.16]} radius={0.28} smoothness={3}>
-        <meshBasicMaterial color={color} />
+      <RoundedBox args={[width, 1.2, 0.14]} radius={0.16} smoothness={3}>
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.35} roughness={0.55} />
       </RoundedBox>
-      <Text font={MONA} fontSize={0.9} color="#ffffff" anchorX="center" anchorY="middle" position={[0, 0.2, 0.1]}>
+      <Text font={MONA} fontSize={0.56} color="#ffffff" anchorX="center" anchorY="middle" position={[0, 0.16, 0.09]} maxWidth={width - 0.3}>
         {t.title}
       </Text>
-      <Text font={MONA} fontSize={0.36} color="#ffffff" fillOpacity={0.9} anchorX="center" anchorY="middle" position={[0, -0.46, 0.1]}>
+      <Text font={MONA} fontSize={0.24} color="#ffffff" fillOpacity={0.92} anchorX="center" anchorY="middle" position={[0, -0.33, 0.09]}>
         {visited ? 'Visited' : t.sub}
       </Text>
-    </Billboard>
+    </group>
   )
 }
 
@@ -413,15 +480,22 @@ export default function Landmarks() {
                 {l.id === 'tower' && <Tower lit={lit} />}
                 {l.id === 'library' && <Library />}
                 {l.id === 'investiq' && <Ticker />}
-                {l.id === 'postbox' && <Postbox />}
+                {l.id === 'postbox' && (
+                  <>
+                    <Postbox />
+                    <group position={[2.7, 0, 0.4]}>
+                      <mesh position={[0, 1.05, -0.12]} castShadow>
+                        <cylinderGeometry args={[0.08, 0.08, 2.1, 6]} />
+                        <meshStandardMaterial color={C.slate} />
+                      </mesh>
+                      <FacadeSign id="postbox" color={C.postRed} position={[0, 2.5, 0]} width={3.4} />
+                    </group>
+                  </>
+                )}
                 {l.id === 'paisabazaar' && <Office lit={lit} />}
                 {l.id === 'nit' && <Hills />}
               </group>
             </RigidBody>
-            {/* the name floats just behind the ring you drive into */}
-            <group position={[polar(l.angle, 28.4)[0], 0, polar(l.angle, 28.4)[1]]}>
-              <SkySign id={l.id} color={l.color} />
-            </group>
             <RoadSign def={l} />
             <Ring def={l} />
           </group>
