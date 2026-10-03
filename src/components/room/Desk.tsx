@@ -6,7 +6,7 @@ import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import { C, Interactive } from '@/components/room/kit'
 import { buzz } from '@/components/room/sound'
-import { say, setState, useRoom } from '@/components/room/store'
+import { getState, say, setState, useRoom } from '@/components/room/store'
 
 export const DESK_Y = 0.76
 
@@ -199,8 +199,10 @@ export function Pager() {
     idx.current++
   }
   useEffect(() => {
-    const first = setTimeout(page, 9000)
-    const id = setInterval(page, 26000)
+    // only page on its own when nobody else is talking
+    const auto = () => getState().bubbles.length === 0 && getState().focus === 'room' && page()
+    const first = setTimeout(auto, 9000)
+    const id = setInterval(auto, 26000)
     return () => {
       clearTimeout(first)
       clearInterval(id)

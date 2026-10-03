@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useProgress } from '@react-three/drei'
 import { SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react'
 import Reader from '@/components/reader/Reader'
+import BubbleLayer from '@/components/room/BubbleLayer'
 import Discoveries from '@/components/room/Discoveries'
 import HoverLabel from '@/components/room/HoverLabel'
 import SatvikOS from '@/components/room/SatvikOS'
@@ -90,6 +91,7 @@ export default function RoomExperience({ data }: { data: RoomData }) {
       <h1 className="sr-only">Satvik Singh, fullstack AI engineer</h1>
       <div className="absolute inset-0">
         <Scene data={data} onRide={ride} />
+        <BubbleLayer />
       </div>
 
       {/* name label, like a tag on a diorama */}

@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { AdaptiveDpr, ContactShadows, Html, PerformanceMonitor, RoundedBox } from '@react-three/drei'
+import { AdaptiveDpr, ContactShadows, PerformanceMonitor, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import { Avatar } from '@/components/room/Avatar'
 import { Beanbag, Bookshelf, Cat, Corkboard, Plant, Poster, ServerRack, WallClock } from '@/components/room/Decor'
@@ -11,28 +11,14 @@ import { C, Interactive } from '@/components/room/kit'
 import { makeScreenTexture } from '@/components/room/screenTexture'
 import { sanitizeNormals } from '@/components/three/sanitizeNormals'
 import { Shell } from '@/components/room/Shell'
-import { setState, useRoom } from '@/components/room/store'
-import { openReader } from '@/components/reader/readerStore'
+import { ANCHORS } from '@/components/room/anchors'
+import { bubbleEls } from '@/components/room/BubbleLayer'
+import { getState, setState, useRoom } from '@/components/room/store'
 import type { RoomData } from '@/components/room/types'
 
 const SCREEN = new THREE.Vector3(0.15, DESK_Y + 0.44, -2.33)
 const ROOM_TARGET = new THREE.Vector3(-0.1, 0.85, -0.25)
 
-export const ANCHORS: Record<string, [number, number, number]> = {
-  avatar: [0.15, 1.72, -1.32],
-  lamp: [-0.7, 1.45, -2.2],
-  chai: [-0.42, 1.12, -1.82],
-  pager: [0.92, 1.08, -1.8],
-  laptop: [0.98, 1.32, -2.2],
-  shelf: [2.0, 2.15, -2.2],
-  board: [-0.95, 2.28, -2.4],
-  clock: [1.08, 2.62, -2.45],
-  rack: [-2.1, 1.15, 1.75],
-  cat: [-1.5, 0.95, 0.45],
-  plant: [-2.2, 1.05, -2.15],
-  monitor: [0.15, 1.75, -2.3],
-  window: [-2.4, 2.35, -0.1],
-}
 
 function Ready() {
   const frames = useRef(0)
@@ -100,34 +86,23 @@ function Rig({ narrow }: { narrow: boolean }) {
   return null
 }
 
-function Bubbles() {
-  const bubbles = useRoom((s) => s.bubbles)
-  return (
-    <>
-      {bubbles.map((b) => (
-        <Html key={b.id} position={ANCHORS[b.anchor] ?? [0, 2, 0]} center zIndexRange={[100, 90]} style={{ pointerEvents: 'none' }}>
-          <div className="pointer-events-none relative w-max max-w-[min(17rem,64vw)] -translate-y-1/2 animate-[bubble-in_0.42s_cubic-bezier(0.2,1.5,0.4,1)] rounded-2xl rounded-bl-sm bg-[#f8f4ee] px-4 py-3 text-[14px] font-medium leading-snug text-[#1b1d24] shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
-            {b.text}
-            {b.link && (
-              <a
-                href={b.link.href}
-                target={b.link.external ? '_blank' : undefined}
-                rel="noopener noreferrer"
-                onClick={(e) => {
-                  if (!b.link?.read) return
-                  e.preventDefault()
-                  openReader(b.link.read.kind, b.link.read.id)
-                }}
-                className="pointer-events-auto mt-2 block font-semibold text-[#c23a12] underline decoration-2 underline-offset-4"
-              >
-                {b.link.label}
-              </a>
-            )}
-          </div>
-        </Html>
-      ))}
-    </>
-  )
+/** Moves the DOM speech bubbles to their anchors each frame; no React roots inside the canvas. */
+function BubbleProjector() {
+  const v = useMemo(() => new THREE.Vector3(), [])
+  useFrame(({ camera, size }) => {
+    for (const b of getState().bubbles) {
+      const el = bubbleEls.get(b.id)
+      if (!el) continue
+      const a = ANCHORS[b.anchor] ?? [0, 2, 0]
+      v.set(a[0], a[1], a[2]).project(camera)
+      const behind = v.z > 1
+      const x = (v.x * 0.5 + 0.5) * size.width
+      const y = (-v.y * 0.5 + 0.5) * size.height
+      el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`
+      el.style.visibility = behind ? 'hidden' : 'visible'
+    }
+  })
+  return null
 }
 
 function Monitor() {
@@ -242,7 +217,7 @@ export default function Scene({ data, onRide }: { data: RoomData; onRide: () => 
           <Cat />
         </Beanbag>
         <ContactShadows position={[0, 0.012, 0]} opacity={0.3} scale={6} blur={2.4} far={2} frames={1} resolution={512} />
-        <Bubbles />
+        <BubbleProjector />
         <Ready />
       </Suspense>
     </Canvas>
