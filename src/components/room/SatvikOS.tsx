@@ -56,7 +56,8 @@ export default function SatvikOS({
   onRide: () => void
   full?: boolean
 }) {
-  const [wins, setWins] = useState<Win[]>([{ id: 'about', x: 250, y: 60, z: 1 }])
+  // phones show windows full screen, so start on the desktop where the icons are
+  const [wins, setWins] = useState<Win[]>(full ? [] : [{ id: 'about', x: 250, y: 60, z: 1 }])
   const [now, setNow] = useState('')
   const zTop = useRef(2)
 
