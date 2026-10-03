@@ -61,7 +61,8 @@ export function useRoom<T>(select: (s: State) => T): T {
 export function say(anchor: string, text: string, ms = 4200, link?: BubbleLink) {
   const id = `${anchor}-${Date.now()}`
   setState((s) => ({
-    bubbles: [...s.bubbles.filter((b) => b.anchor !== anchor), { id, anchor, text, until: Date.now() + ms, link }],
+    // one voice at a time: a new line replaces whatever was being said
+    bubbles: [{ id, anchor, text, until: Date.now() + ms, link }],
   }))
   setTimeout(() => setState((s) => ({ bubbles: s.bubbles.filter((b) => b.id !== id) })), ms)
 }
@@ -80,6 +81,9 @@ export const FINDABLE = [
   'rack',
   'gopher',
   'auto',
+  'mochi',
+  'heimdall',
+  'kudos',
 ] as const
 
 export function discover(name: string) {

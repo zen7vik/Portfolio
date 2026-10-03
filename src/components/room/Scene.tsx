@@ -7,9 +7,11 @@ import * as THREE from 'three'
 import { Avatar } from '@/components/room/Avatar'
 import { Beanbag, Bookshelf, Cat, Corkboard, Plant, Poster, ServerRack, WallClock } from '@/components/room/Decor'
 import { Chai, DESK_Y, Desk, Lamp, Laptop, Pager } from '@/components/room/Desk'
-import { C, Interactive } from '@/components/room/kit'
+import { C, Interactive, drag } from '@/components/room/kit'
 import { makeScreenTexture } from '@/components/room/screenTexture'
 import { sanitizeNormals } from '@/components/three/sanitizeNormals'
+import { Heimdall, Kudos } from '@/components/room/Extras'
+import { Mochi } from '@/components/room/Mochi'
 import { Shell } from '@/components/room/Shell'
 import { ANCHORS } from '@/components/room/anchors'
 import { bubbleEls } from '@/components/room/BubbleLayer'
@@ -27,6 +29,53 @@ function Ready() {
     // patch again once the late text meshes exist
     if (frames.current === 20 || frames.current === 120) sanitizeNormals(scene)
     if (frames.current === 20) setState({ ready: true })
+  })
+  return null
+}
+
+/** Drag anywhere to swing the camera around the room; it eases back when you let go. */
+const orbit = { yaw: 0, pitch: 0, tYaw: 0, tPitch: 0, down: false, x: 0, y: 0 }
+const off = new THREE.Vector3()
+
+function OrbitDrag() {
+  const { gl } = useThree()
+  useEffect(() => {
+    const el = gl.domElement.parentElement ?? gl.domElement
+    const down = (e: PointerEvent) => {
+      orbit.down = true
+      orbit.x = e.clientX
+      orbit.y = e.clientY
+      drag.moved = 0
+    }
+    const move = (e: PointerEvent) => {
+      if (!orbit.down) return
+      const dx = e.clientX - orbit.x
+      const dy = e.clientY - orbit.y
+      orbit.x = e.clientX
+      orbit.y = e.clientY
+      drag.moved += Math.abs(dx) + Math.abs(dy)
+      orbit.tYaw = THREE.MathUtils.clamp(orbit.tYaw - dx * 0.006, -0.85, 0.85)
+      orbit.tPitch = THREE.MathUtils.clamp(orbit.tPitch + dy * 0.004, -0.25, 0.35)
+    }
+    const up = () => (orbit.down = false)
+    el.addEventListener('pointerdown', down)
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    return () => {
+      el.removeEventListener('pointerdown', down)
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+    }
+  }, [gl])
+  useFrame((_, dt) => {
+    if (!orbit.down) {
+      // settle back toward the home view
+      orbit.tYaw *= Math.exp(-dt * 0.6)
+      orbit.tPitch *= Math.exp(-dt * 0.6)
+    }
+    const k = 1 - Math.exp(-dt * 8)
+    orbit.yaw += (orbit.tYaw - orbit.yaw) * k
+    orbit.pitch += (orbit.tPitch - orbit.pitch) * k
   })
   return null
 }
@@ -78,6 +127,13 @@ function Rig({ narrow }: { narrow: boolean }) {
     if (cam.fov !== fov) {
       cam.fov = fov
       cam.updateProjectionMatrix()
+    }
+    if (focus !== 'monitor' || narrow) {
+      // swing the camera around the look target by the drag offset
+      off.copy(pos).sub(look)
+      off.applyAxisAngle(THREE.Object3D.DEFAULT_UP, orbit.yaw)
+      off.y += orbit.pitch * off.length() * 0.6
+      pos.copy(look).add(off)
     }
     cam.position.lerp(pos, k)
     target.lerp(look, k)
@@ -196,6 +252,7 @@ export default function Scene({ data, onRide }: { data: RoomData; onRide: () => 
       <fog attach="fog" args={[night ? '#141726' : '#efe3d2', 20, 40]} />
       <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(1.75)} flipflops={3} onFallback={() => setDpr(1)} />
       <AdaptiveDpr pixelated={false} />
+      <OrbitDrag />
       <Rig narrow={narrow} />
       <Lights night={night} />
       <Suspense fallback={null}>
@@ -209,6 +266,9 @@ export default function Scene({ data, onRide }: { data: RoomData; onRide: () => 
         <Avatar />
         <Bookshelf posts={data.posts} onRide={onRide} />
         <Corkboard />
+        <Kudos />
+        <Heimdall />
+        <Mochi />
         <WallClock />
         <Poster />
         <ServerRack />

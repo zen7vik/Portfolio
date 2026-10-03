@@ -4,7 +4,7 @@ test('room loads and the loader clears', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByText('Satvik Singh', { exact: true }).first()).toBeVisible()
   await expect(page.getByText('Brewing chai, waking the cat...')).toBeHidden({ timeout: 30_000 })
-  await expect(page.getByText(/Found 0 of 13 things/)).toBeVisible()
+  await expect(page.getByText(/Found 0 of 16 things/)).toBeVisible()
 })
 
 test('read page has every section', async ({ page }) => {

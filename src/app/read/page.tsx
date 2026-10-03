@@ -48,13 +48,21 @@ const quests = [
     href: `${M}i-measured-okf-rag-a-knowledge-graph-and-plain-grep-on-production-code-a426386651e8`,
     tint: '#f6ecd0',
   },
+  {
+    t: 'Heimdall and Mochi',
+    big: 'Heimdall',
+    cap: 'my AI teammate in Slack',
+    d: 'Reviews pull requests, reads failed builds and finds the first real error, and watches stuck PRs and deploys. Its dashboard has a golden puppy, Mochi, with her own little adventure game.',
+    href: '/',
+    tint: '#efe6fb',
+  },
 ]
 
 const numbers = [
   ['72M', 'risk calculations a month, 6 regions'],
   ['-53%', 'p95 latency, 604 to 281 ms'],
   ['3.8%', 'workflow failure rate, from 12.3%'],
-  ['1s', 'cluster cutover, replacing a 1.5h freeze'],
+  ['34', 'regressions stopped in review before merge, from 352 reviews in six months'],
 ]
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
@@ -230,13 +238,15 @@ export default async function ReadPage() {
 
         <Section id="projects" title="Side quests">
           <div className="grid gap-5 sm:grid-cols-2">
-            {quests.map((q) => (
+            {quests.map((q, i) => (
               <a
                 key={q.t}
                 href={q.href}
-                target="_blank"
+                target={q.href.startsWith('/') ? undefined : '_blank'}
                 rel="noopener noreferrer"
-                className="reveal group flex flex-col rounded-[1.6rem] p-7 ring-1 ring-[#1b1d24]/[0.06] transition-transform duration-300 hover:-translate-y-1 hover:rotate-[-0.6deg] md:p-9"
+                className={`reveal group flex flex-col rounded-[1.6rem] p-7 ring-1 ring-[#1b1d24]/[0.06] transition-transform duration-300 hover:-translate-y-1 hover:rotate-[-0.6deg] md:p-9 ${
+                  i === quests.length - 1 && quests.length % 2 ? 'sm:col-span-2' : ''
+                }`}
                 style={{ background: q.tint }}
               >
                 <p className="display text-[clamp(2.6rem,5vw,3.6rem)] text-[#1b1d24]">{q.big}</p>

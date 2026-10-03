@@ -21,6 +21,9 @@ export const C = {
   hair: '#1d1a17',
 }
 
+/** Pixels moved during the current pointer press; clicks after a drag are ignored. */
+export const drag = { moved: 0 }
+
 export function hourNow() {
   return new Date().getHours() + new Date().getMinutes() / 60
 }
@@ -75,6 +78,7 @@ export function Interactive({
       }}
       onClick={(e) => {
         e.stopPropagation()
+        if (drag.moved > 6) return
         boop.current = 1
         blip(480 + Math.random() * 200)
         discover(name)

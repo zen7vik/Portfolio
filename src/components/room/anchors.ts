@@ -12,4 +12,7 @@ export const ANCHORS: Record<string, [number, number, number]> = {
   plant: [-2.2, 1.05, -2.15],
   monitor: [0.15, 1.75, -2.3],
   window: [-2.4, 2.35, -0.1],
+  mochi: [0.4, 0.85, 0.5],
+  heimdall: [1.32, 1.3, -1.95],
+  kudos: [2.02, 2.95, -2.4],
 }

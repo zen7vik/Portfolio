@@ -16,11 +16,12 @@ export const roles: Role[] = [
     blurb: 'Cyber-risk quantification and third-party risk platform. Go and TypeScript services, React, 6 production regions.',
     points: [
       'Own the cyber-risk scoring engine: 72M risk calculations a month across 6 regions and 354 tenants. Cut p95 API latency 53% (604 to 281 ms) and the error rate 58%.',
-      'Own the agentic workflow platform on Temporal. Cut its failure rate from 12.3% to 3.8% while volume doubled, and replaced a 1.5-hour-downtime cluster migration with a one-second drain-and-flip.',
+      'Own the agentic workflow platform on Temporal. Cut its failure rate from 12.3% to 3.8% while volume doubled, replaced a 1.5-hour-downtime cluster migration with a one-second drain-and-flip, and shipped its execution insights.',
       'Designed and shipped the no-code HTTP integration node and its encrypted credential store across 6 services, with DNS-pinned SSRF defense and KMS so only ciphertext crosses service boundaries.',
-      'Built and own the AI evidence pipeline behind questionnaire automation: malware scanning, chunking, and embedding into a hybrid vector and keyword index on OpenSearch Serverless.',
-      'Shipped attribute-based access control with org-hierarchy scoping, a P0 that unblocked Fortune-500 deals, and a five-dimension executive vendor-risk view serving 2.2M requests a month.',
-      'Built developer tooling the team adopted: a code knowledge graph pipeline live in 15 repositories and a Slack-native AI code reviewer teammates request by name.',
+      'Now building workflow rate limiting and resource governance: per-run budgets, fan-out caps and daily quotas, rolled out in shadow mode first so enforcement rests on evidence.',
+      'Built and own the AI evidence pipeline behind questionnaire automation, and delivered the five-dimension executive risk view that was part of a Gartner demo.',
+      'Reviewed 352 pull requests for 38 engineers in six months; 34 of those reviews stopped a regression before it merged. Incident lead on 10 incidents.',
+      'Built the tooling the team runs on: code knowledge graphs measured in a blind benchmark of 111 tasks, and Heimdall, a Slack AI teammate that reviews PRs and triages failed builds.',
     ],
   },
   {

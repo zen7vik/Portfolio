@@ -216,6 +216,9 @@ function AppBody({ id, data, onRide }: { id: AppId; data: RoomData; onRide: () =
             uploaded documents into answers. Some nights it means being paged about all of the above.
           </p>
           <p>
+            In the last six months I also reviewed 352 pull requests for 38 engineers; 34 of those reviews stopped a regression before it shipped.
+          </p>
+          <p>
             I like making systems boring in production and writing up what breaks them. Open <b>Work</b> for the long
             version, or <b>ride.exe</b> if you would rather drive.
           </p>
@@ -282,7 +285,8 @@ function AppBody({ id, data, onRide }: { id: AppId; data: RoomData; onRide: () =
             ['Bitcask, built then broken', 'A key value store in Go, then a week of SIGKILLs and flipped bits. fsync on every write was 2,940x slower.', 'https://github.com/zen7vik/bitcask-case-study'],
             ['Redis, measured', 'Every internal traced to source and measured. Going from 512 to 513 hash fields costs 4.09x the memory.', site.medium],
             ['Grep vs RAG vs graphs', 'Four ways to give an AI agent code context, measured on 12 real questions. Plain grep was the most reliable.', site.medium],
-            ['Heimdall + code graphs', 'A Slack AI code reviewer teammates ask for by name, and daily code knowledge graphs across 15 repos.', ''],
+            ['Heimdall and Mochi', 'My Slack AI teammate: reviews PRs, reads failed builds for the first real error, and watches stuck PRs and deploys. Its dashboard has Mochi, the puppy now walking around this room.', ''],
+            ['Code knowledge graphs', 'Daily refreshed code graphs, measured in a blind benchmark of 111 tasks across 17 repos: correctness on par with grep, about 17% fewer files read.', ''],
           ].map(([t, d, href]) => (
             <div key={t}>
               <p className="text-[17px] font-semibold text-[#1b1d24]">

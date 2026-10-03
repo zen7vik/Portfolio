@@ -19,6 +19,9 @@ const LABELS: Record<string, string> = {
   auto: 'Ride around Delhi',
   plant: 'A brave plant',
   window: 'Day or night?',
+  mochi: 'Mochi the puppy',
+  heimdall: 'Heimdall, my AI bot',
+  kudos: 'Kind words',
 }
 
 export default function HoverLabel() {
